@@ -1,0 +1,12 @@
+{
+  "id": "profiles",
+  "version": "1.0.0",
+  "entry": "ProfilesModule.dll",
+  "displayName": "Domain Profiles (theo WiFi + domain)",
+  "requiresElevation": false,
+  "autoStart": true,
+  "health": { "pingTimeoutSec": 5, "restartBackoffSec": [2, 5, 15, 60], "maxFailuresBeforeDisable": 3 },
+  "config": {
+    "dataDir": ""
+  }
+}

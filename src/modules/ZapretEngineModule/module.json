@@ -1,0 +1,12 @@
+{
+  "id": "zapret-engine",
+  "version": "1.0.0",
+  "entry": "ZapretEngineModule.dll",
+  "displayName": "Zapret DPI Engine (winws2)",
+  "requiresElevation": true,
+  "autoStart": false,
+  "health": { "pingTimeoutSec": 5, "restartBackoffSec": [2, 5, 15, 60], "maxFailuresBeforeDisable": 3 },
+  "config": {
+    "enginePath": "C:\\Users\\BDTG\\Projects\\modular-app-framework\\bundle\\zapret-win-bundle\\zapret-winws\\winws2.exe"
+  }
+}

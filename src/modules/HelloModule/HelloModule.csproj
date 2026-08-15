@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>HelloModule</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\FrameworkSDK\FrameworkSDK.csproj" />
+    <None Include="module.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Stage: copy dll + deps + module.json về thư mục module (cạnh nhau, supervisor scan được) -->
+  <Target Name="StageModule" AfterTargets="Build">
+    <ItemGroup>
+      <StageFiles Include="$(TargetDir)\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(StageFiles)" DestinationFolder="$(MSBuildProjectDirectory)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

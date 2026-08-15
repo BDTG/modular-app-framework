@@ -1,0 +1,12 @@
+{
+  "id": "blockcheck",
+  "version": "1.0.0",
+  "entry": "BlockcheckModule.dll",
+  "displayName": "Zapret Blockcheck2 (dò chiến lược)",
+  "requiresElevation": true,
+  "autoStart": false,
+  "health": { "pingTimeoutSec": 5, "restartBackoffSec": [2, 5, 15, 60], "maxFailuresBeforeDisable": 3 },
+  "config": {
+    "bundlePath": "C:\\Users\\BDTG\\Projects\\modular-app-framework\\bundle\\zapret-win-bundle"
+  }
+}

@@ -1,0 +1,62 @@
+<Window x:Class="AppHost.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Modular Framework — AppHost" Height="640" Width="900"
+        WindowStartupLocation="CenterScreen" Background="#1E1E2E">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="Modules root: " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+            <TextBox x:Name="ModulesRootBox" Width="420" Foreground="#CDD6F4" Background="#313244"
+                     Text="C:\Users\BDTG\Projects\modular-app-framework\src\modules"/>
+            <Button x:Name="RefreshBtn" Content="Quét lại" Click="Refresh_Click" Margin="8,0,0,0" Padding="10,4"/>
+            <Button x:Name="StartAllBtn" Content="▶ Start tất cả" Click="StartAll_Click" Margin="8,0,0,0" Padding="10,4"/>
+            <Button x:Name="StopAllBtn" Content="■ Stop tất cả" Click="StopAll_Click" Margin="8,0,0,0" Padding="10,4"/>
+        </StackPanel>
+
+        <!-- Module list -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="360"/>
+            </Grid.ColumnDefinitions>
+
+            <DataGrid x:Name="ModuleGrid" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single" Background="#181825" Foreground="#CDD6F4"
+                      RowBackground="#181825" AlternatingRowBackground="#1E1E2E"
+                      GridLinesVisibility="None" HeadersVisibility="Column"
+                      SelectionChanged="ModuleGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Manifest.Id}" Width="90"/>
+                    <DataGridTextColumn Header="Tên" Binding="{Binding Manifest.DisplayName}" Width="*"/>
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding State}" Width="110"/>
+                    <DataGridTextColumn Header="Restart" Binding="{Binding RestartCount}" Width="60"/>
+                    <DataGridTextColumn Header="PID" Binding="{Binding Process.Id}" Width="60"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Log viewer -->
+            <DockPanel Grid.Column="1" Margin="10,0,0,0">
+                <TextBlock DockPanel.Dock="Top" x:Name="LogTitle" Text="Log (chọn module)" Foreground="#A6E3A1" Margin="0,0,0,4"/>
+                <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Consolas" FontSize="11"
+                         Background="#11111B" Foreground="#CDD6F4" VerticalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap"/>
+            </DockPanel>
+        </Grid>
+
+        <!-- Demo ops cho module crashy -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+            <TextBlock Text="Demo cách ly (crashy): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+            <Button x:Name="BoomBtn" Content="💥 boom (exception)" Click="Boom_Click" Padding="10,4" Margin="4,0"/>
+            <Button x:Name="ExitBtn" Content="🚪 exit (Environment.Exit)" Click="Exit_Click" Padding="10,4" Margin="4,0"/>
+            <Button x:Name="HangBtn" Content="💤 hang (30s)" Click="Hang_Click" Padding="10,4" Margin="4,0"/>
+            <TextBlock x:Name="StatusText" Text="" Foreground="#F9E2AF" VerticalAlignment="Center" Margin="16,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

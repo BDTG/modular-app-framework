@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/modules/">
+    <Project Path="modules/BlockcheckModule/BlockcheckModule.csproj" />
+    <Project Path="modules/CrashyModule/CrashyModule.csproj" />
+    <Project Path="modules/HelloModule/HelloModule.csproj" />
+    <Project Path="modules/ProfilesModule/ProfilesModule.csproj" />
+    <Project Path="modules/ZapretEngineModule/ZapretEngineModule.csproj" />
+  </Folder>
+  <Project Path="AppHost/AppHost.csproj" />
+  <Project Path="FrameworkSDK/FrameworkSDK.csproj" />
+  <Project Path="HostLib/HostLib.csproj" />
+  <Project Path="ModuleHost/ModuleHost.csproj" />
+  <Project Path="SmokeTest/SmokeTest.csproj" />
+</Solution>

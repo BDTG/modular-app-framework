@@ -1,0 +1,23 @@
+# Build artifacts
+bin/
+obj/
+*.user
+*.suo
+
+# Module build outputs (copied next to module.json by build)
+src/modules/**/*.dll
+src/modules/**/*.pdb
+src/modules/**/*.deps.json
+src/modules/**/*.runtimeconfig.json
+
+# Zapret third-party binaries (recreate via src/scripts/download_zapret_binaries.ps1)
+bundle/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vs/
+.idea/
+.vscode/

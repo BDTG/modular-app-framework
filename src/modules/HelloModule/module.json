@@ -1,0 +1,13 @@
+{
+  "id": "hello",
+  "version": "1.0.0",
+  "entry": "HelloModule.dll",
+  "displayName": "Hello Demo",
+  "requiresElevation": false,
+  "autoStart": true,
+  "health": { "pingTimeoutSec": 5, "restartBackoffSec": [2, 5, 15, 60], "maxFailuresBeforeDisable": 3 },
+  "config": {
+    "greeting": "Xin chào từ module hello",
+    "tickSeconds": 5
+  }
+}

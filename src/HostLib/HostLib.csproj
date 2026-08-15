@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ModularFramework.HostLib</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FrameworkSDK\FrameworkSDK.csproj" />
+  </ItemGroup>
+
+  <!-- Copy ModuleHost.exe + deps vào output của host (bên cạnh AppHost/SmokeTest) -->
+  <Target Name="CopyModuleHost" AfterTargets="Build">
+    <MSBuild Projects="..\ModuleHost\ModuleHost.csproj" Targets="Build" Properties="Configuration=$(Configuration)" />
+    <ItemGroup>
+      <ModuleHostFiles Include="..\ModuleHost\bin\$(Configuration)\net10.0\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModuleHostFiles)" DestinationFolder="$(OutDir)modulehost\" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
