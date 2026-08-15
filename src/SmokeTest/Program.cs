@@ -25,9 +25,16 @@ Console.WriteLine($"host:    {moduleHostExe}");
 using var sup = new ModuleSupervisor(moduleHostExe, modulesRoot, logsRoot);
 sup.StateChanged += inst => Console.WriteLine($"  [state] {inst.Manifest.Id}: {inst.State}" + (inst.LastError is null ? "" : $" ({inst.LastError})"));
 
-Check("scan thấy hello + crashy", sup.Modules.ContainsKey("hello") && sup.Modules.ContainsKey("crashy"),
-    $"found: {string.Join(", ", sup.Modules.Keys)}");
+// ── 0. Scan ────────────────────────────────────────────────────────
+bool haveExamples = sup.Modules.ContainsKey("hello") && sup.Modules.ContainsKey("crashy");
+Console.WriteLine($"modules found: {string.Join(", ", sup.Modules.Keys)}");
 
+if (!haveExamples)
+{
+    Console.WriteLine("SKIP  hello/crashy example tests (modules không có ở modules root này)");
+}
+else
+{
 // ── 1. Start cả 2 ────────────────────────────────────────────────
 await sup.StartAsync("hello");
 await sup.StartAsync("crashy");
@@ -66,70 +73,80 @@ Check("hello vẫn sống sau crash lần 2", await sup.PingAsync("hello"));
 var crashDir = Path.Combine(logsRoot, "crashes", "crashy");
 var bundles = Directory.Exists(crashDir) ? Directory.GetFiles(crashDir, "crash-*.json") : [];
 Check("crash bundle được tạo (≥2)", bundles.Length >= 2, $"{bundles.Length} bundle(s)");
+}
 
-// ══ GIAI ĐOẠN 2: zapret modules ════════════════════════════════════
+// ══ GIAI ĐOẠN 2: zapret modules (repo riêng — SKIP nếu chưa có ở modules root) ═══
 
 // ── 7. profiles: save → list → network → delete ───────────────────
-await sup.StartAsync("profiles");
-await Task.Delay(800);
-var saveRes = await sup.CallAsync("profiles.save", Json(
-    "domain", "youtube.com", "networkName", "TestNet",
-    "strategy", "[HTTPS] --lua-desync=fake:blob=fake_default_tls:badsum:strategy=1",
-    "rawArgs", "--lua-desync=fake:blob=fake_default_tls:badsum:strategy=1"));
-Check("profiles.save OK", saveRes.GetProperty("ok").GetBoolean());
-var listRes = await sup.CallAsync("profiles.list", Json("network", "TestNet"));
-Check("profiles.list có 1 profile", listRes.GetArrayLength() == 1, $"count={listRes.GetArrayLength()}");
-var netRes = await sup.CallAsync("profiles.network");
-Check("profiles.network trả tên mạng", netRes.TryGetProperty("name", out _));
-await sup.CallAsync("profiles.delete", Json("domain", "youtube.com", "networkName", "TestNet"));
-var list2 = await sup.CallAsync("profiles.list", Json("network", "TestNet"));
-Check("profiles.delete sạch", list2.GetArrayLength() == 0);
+if (sup.Modules.ContainsKey("profiles"))
+{
+    await sup.StartAsync("profiles");
+    await Task.Delay(800);
+    var saveRes = await sup.CallAsync("profiles.save", Json(
+        "domain", "youtube.com", "networkName", "TestNet",
+        "strategy", "[HTTPS] --lua-desync=fake:blob=fake_default_tls:badsum:strategy=1",
+        "rawArgs", "--lua-desync=fake:blob=fake_default_tls:badsum:strategy=1"));
+    Check("profiles.save OK", saveRes.GetProperty("ok").GetBoolean());
+    var listRes = await sup.CallAsync("profiles.list", Json("network", "TestNet"));
+    Check("profiles.list có 1 profile", listRes.GetArrayLength() == 1, $"count={listRes.GetArrayLength()}");
+    var netRes = await sup.CallAsync("profiles.network");
+    Check("profiles.network trả tên mạng", netRes.TryGetProperty("name", out _));
+    await sup.CallAsync("profiles.delete", Json("domain", "youtube.com", "networkName", "TestNet"));
+    var list2 = await sup.CallAsync("profiles.list", Json("network", "TestNet"));
+    Check("profiles.delete sạch", list2.GetArrayLength() == 0);
+}
+else Console.WriteLine("SKIP  profiles (module không có ở modules root)");
 
 // ── 8. zapret-engine: fake winws2 (.cmd) — start/status/stop ───────
-await sup.StartAsync("zapret-engine");
-await Task.Delay(800);
-var fakeDir = Path.Combine(Path.GetTempPath(), "mf-fake-engine");
-Directory.CreateDirectory(fakeDir);
-var fakeExe = Path.Combine(fakeDir, "fake-winws2.cmd");
-File.WriteAllText(fakeExe, "@echo off\r\necho FAKE-WINWS-STARTED\r\n:loop\r\necho tick\r\ntimeout /t 1 /nobreak >nul\r\ngoto loop\r\n");
+if (sup.Modules.ContainsKey("zapret-engine"))
+{
+    await sup.StartAsync("zapret-engine");
+    await Task.Delay(800);
+    var fakeDir = Path.Combine(Path.GetTempPath(), "mf-fake-engine");
+    Directory.CreateDirectory(fakeDir);
+    var fakeExe = Path.Combine(fakeDir, "fake-winws2.cmd");
+    File.WriteAllText(fakeExe, "@echo off\r\necho FAKE-WINWS-STARTED\r\n:loop\r\necho tick\r\ntimeout /t 1 /nobreak >nul\r\ngoto loop\r\n");
 
-var engStart = await sup.CallAsync("zapret-engine.start", Json("enginePath", fakeExe, "args", "--wf-l3=ipv4"));
-Check("engine.start OK", engStart.GetProperty("ok").GetBoolean(), engStart.TryGetProperty("error", out var e) ? e.GetString() : "");
-await Task.Delay(1500);
-var st = await sup.CallAsync("zapret-engine.status");
-string lastLine = st.TryGetProperty("lastLogLine", out var ll) ? ll.GetString() ?? "" : "";
-bool stRunning = st.TryGetProperty("running", out var rr) && rr.GetBoolean();
-bool stPid = st.TryGetProperty("pid", out var pp) && pp.GetInt32() > 0;
-Check($"engine.status running (raw={st})", stRunning && stPid, $"pid={pp.GetInt32()}");
-Check("engine log bắt được output (FAKE-WINWS/tick)", lastLine.Contains("FAKE-WINWS") || lastLine.Contains("tick"), lastLine);
+    var engStart = await sup.CallAsync("zapret-engine.start", Json("enginePath", fakeExe, "args", "--wf-l3=ipv4"));
+    Check("engine.start OK", engStart.GetProperty("ok").GetBoolean(), engStart.TryGetProperty("error", out var e) ? e.GetString() : "");
+    await Task.Delay(1500);
+    var st = await sup.CallAsync("zapret-engine.status");
+    string lastLine = st.TryGetProperty("lastLogLine", out var ll) ? ll.GetString() ?? "" : "";
+    bool stRunning = st.TryGetProperty("running", out var rr) && rr.GetBoolean();
+    bool stPid = st.TryGetProperty("pid", out var pp) && pp.GetInt32() > 0;
+    Check($"engine.status running (raw={st})", stRunning && stPid, $"pid={pp.GetInt32()}");
+    Check("engine log bắt được output (FAKE-WINWS/tick)", lastLine.Contains("FAKE-WINWS") || lastLine.Contains("tick"), lastLine);
 
-await sup.CallAsync("zapret-engine.stop");
-await Task.Delay(800);
-var st2 = await sup.CallAsync("zapret-engine.status");
-Check("engine.stop → stopped", !st2.GetProperty("running").GetBoolean());
+    await sup.CallAsync("zapret-engine.stop");
+    await Task.Delay(800);
+    var st2 = await sup.CallAsync("zapret-engine.status");
+    Check("engine.stop → stopped", !st2.GetProperty("running").GetBoolean());
 
-var engBad = await sup.CallAsync("zapret-engine.start", Json("enginePath", "C:\\nonexistent\\winws2.exe"));
-Check("engine.start lỗi SẠCH khi thiếu exe", !engBad.GetProperty("ok").GetBoolean() && engBad.GetProperty("error").GetString()!.Length > 0);
+    var engBad = await sup.CallAsync("zapret-engine.start", Json("enginePath", "C:\\nonexistent\\winws2.exe"));
+    Check("engine.start lỗi SẠCH khi thiếu exe", !engBad.GetProperty("ok").GetBoolean() && engBad.GetProperty("error").GetString()!.Length > 0);
 
-var ba = await sup.CallAsync("zapret-engine.buildArgs", Json(
-    "filterIpv4", true, "filterIpv6", false,
-    "udpPorts", "443,50000-65535", "tcpPorts", "80,443",
-    "fakeUdp", true, "hostlistAuto", true));
-string baStr = ba.GetProperty("args").GetString()!;
-Check("buildArgs mapping v2 (--wf-udp-out + lua-desync)", baStr.Contains("--wf-udp-out=443,50000-65535") && baStr.Contains("--lua-desync=fake") && baStr.Contains("--hostlist-auto=hostlist.txt"), baStr);
+    var ba = await sup.CallAsync("zapret-engine.buildArgs", Json(
+        "filterIpv4", true, "filterIpv6", false,
+        "udpPorts", "443,50000-65535", "tcpPorts", "80,443",
+        "fakeUdp", true, "hostlistAuto", true));
+    string baStr = ba.GetProperty("args").GetString()!;
+    Check("buildArgs mapping v2 (--wf-udp-out + lua-desync)", baStr.Contains("--wf-udp-out=443,50000-65535") && baStr.Contains("--lua-desync=fake") && baStr.Contains("--hostlist-auto=hostlist.txt"), baStr);
+}
+else Console.WriteLine("SKIP  zapret-engine (module không có ở modules root)");
 
 // ── 9. blockcheck: không có bundle → lỗi sạch (graceful) ──────────
-await sup.StartAsync("blockcheck");
-await Task.Delay(800);
-var bc = await sup.CallAsync("blockcheck.run", Json("domain", "youtube.com", "ipv4", true, "ipv6", false));
-Check("blockcheck thiếu bundle → lỗi sạch", !bc.GetProperty("ok").GetBoolean() && bc.GetProperty("error").GetString()!.Contains("bundle"), bc.TryGetProperty("error", out var be) ? be.GetString() : "");
+if (sup.Modules.ContainsKey("blockcheck"))
+{
+    await sup.StartAsync("blockcheck");
+    await Task.Delay(800);
+    var bc = await sup.CallAsync("blockcheck.run", Json("domain", "youtube.com", "ipv4", true, "ipv6", false));
+    Check("blockcheck thiếu bundle → lỗi sạch", !bc.GetProperty("ok").GetBoolean() && bc.GetProperty("error").GetString()!.Contains("bundle"), bc.TryGetProperty("error", out var be) ? be.GetString() : "");
+}
+else Console.WriteLine("SKIP  blockcheck (module không có ở modules root)");
 
 // ── 10. stop sạch tất cả ───────────────────────────────────────────
-await sup.StopAsync("profiles");
-await sup.StopAsync("zapret-engine");
-await sup.StopAsync("blockcheck");
-await sup.StopAsync("hello");
-await sup.StopAsync("crashy");
+foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "hello", "crashy" })
+    if (sup.Modules.ContainsKey(id)) await sup.StopAsync(id);
 await Task.Delay(1000);
 Check("stop sạch tất cả module", sup.Modules.Values.All(m => m.State == ModuleRunState.Stopped));
 
