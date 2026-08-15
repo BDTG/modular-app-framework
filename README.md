@@ -373,6 +373,37 @@ Giai đoạn 3 (sau):      Port MyOptimizationTool, 1000-IN-ONE thành module
     "1 nút bấm chống DPI 2 lớp" (packet-level + proxy transport)
 ```
 
+### Cấu trúc multi-repo (từ 16/08/2026)
+
+Module THẬT tách repo riêng để AI sửa từng module với chi phí token tối thiểu
+(clone 1 repo nhỏ, không đọc cả framework). Framework repo giữ `hello` + `crashy`
+làm example module (demo cách ly + SmokeTest).
+
+| Repo | Nội dung |
+|---|---|
+| [BDTG/modular-app-framework](https://github.com/BDTG/modular-app-framework) | FrameworkSDK, HostLib, ModuleHost, AppHost, SmokeTest, scripts |
+| [BDTG/zapret-engine-module](https://github.com/BDTG/zapret-engine-module) | Module `zapret-engine` (winws2) |
+| [BDTG/blockcheck-module](https://github.com/BDTG/blockcheck-module) | Module `blockcheck` (blockcheck2.sh) |
+| [BDTG/profiles-module](https://github.com/BDTG/profiles-module) | Module `profiles` (WiFi+domain) |
+
+**Cơ chế dependency:** module repo dùng `PackageReference FrameworkSDK` (version pinned)
+qua **NuGet local feed** `C:\Users\BDTG\mf-local-feed`. Framework đổi → chạy
+`src/scripts/publish_local_feed.ps1` (pack + đẩy vào feed) → module bump version nếu cần.
+Máy khác: sửa `nuget.config` trỏ feed riêng hoặc NuGet server.
+
+**Cách chạy cả 5 module trong AppHost:** tạo workspace `mf-all\` với junction
+tới từng repo (hoặc trỏ thẳng Modules root vào `src\modules` cho 2 module example):
+
+```powershell
+# mf-all: junction tới từng module repo
+New-Item -ItemType Junction -Path mf-all\hello         -Target ...\modular-app-framework\src\modules\HelloModule
+New-Item -ItemType Junction -Path mf-all\zapret-engine -Target ...\mf-modules\zapret-engine-module
+# ... tương tự crashy / blockcheck / profiles
+# AppHost → Modules root: C:\Users\BDTG\Projects\mf-all
+```
+
+SmokeTest tự guard: module nào không có ở modules root thì SKIP (không FAIL).
+
 ### Lợi ích ngay lập tức với chính bạn
 - Zapret engine (native, hay crash do driver) chạy tiến trình riêng → GUI không bao giờ bị kéo theo.
 - Blockcheck chạy lâu (phút) → không block GUI (host gọi async qua pipe, có progress event).
