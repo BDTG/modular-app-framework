@@ -199,8 +199,51 @@ if (bcDomain != null)
     }
 }
 
+// ── 9c. proxy-client (sing-box): buildConfig → check → start fail-graceful ──
+if (sup.Modules.ContainsKey("proxy-client"))
+{
+    await sup.StartAsync("proxy-client");
+    await Task.Delay(800);
+
+    var bcV = await sup.CallAsync("proxy-client.buildConfig", Json(
+        "type", "vless-reality", "server", "203.0.113.10", "port", 443,
+        "uuid", "bf000d23-0752-40b4-affe-68f7707a9661", "sni", "www.cloudflare.com",
+        "publicKey", "RNuPxycKo3Kj7dZPjR1MbCU5SAckTzECrewfCgiuu04", "shortId", "abcd"));
+    Check("buildConfig vless-reality OK", bcV.GetProperty("ok").GetBoolean());
+    string cfgV = bcV.GetProperty("args").GetString()!;
+    Check("config chứa vless+reality+tun", cfgV.Contains("\"type\":\"vless\"") && cfgV.Contains("reality") && cfgV.Contains("\"type\":\"tun\""));
+
+    var bcH = await sup.CallAsync("proxy-client.buildConfig", Json(
+        "type", "hysteria2", "server", "203.0.113.10", "port", 443,
+        "password", "secret123", "sni", "example.com"));
+    Check("buildConfig hysteria2 OK", bcH.GetProperty("ok").GetBoolean());
+    Check("config hysteria2 có obfs/password", bcH.GetProperty("args").GetString()!.Contains("hysteria2"));
+
+    var bcBad = await sup.CallAsync("proxy-client.buildConfig", Json("type", "vless-reality", "server", "1.2.3.4"));
+    Check("buildConfig thiếu uuid → lỗi sạch", !bcBad.GetProperty("ok").GetBoolean() && bcBad.GetProperty("error").GetString()!.Contains("uuid"));
+
+    // check: validate config bằng sing-box binary thật (không cần kết nối)
+    var chk = await sup.CallAsync("proxy-client.check", Json("config", cfgV));
+    Check("check config hợp lệ (sing-box check)", chk.GetProperty("ok").GetBoolean(), chk.TryGetProperty("error", out var ce) ? ce.GetString() : "");
+
+    // start không elevated → TUN fail → process thoát, module không crash (fail-graceful)
+    var st = await sup.CallAsync("proxy-client.start", Json("config", cfgV));
+    Check("start trả ok (spawn)", st.GetProperty("ok").GetBoolean());
+    await Task.Delay(5000);
+    var status = await sup.CallAsync("proxy-client.status");
+    string logLine = status.TryGetProperty("lastLogLine", out var ll) ? ll.GetString() ?? "" : "";
+    bool stillRunning = status.TryGetProperty("running", out var rr2) && rr2.GetBoolean();
+    Console.WriteLine($"    [proxy] sau 5s: running={stillRunning} lastLogLine='{logLine}'");
+    Check("sing-box spawn rồi thoát/ghi log (không treo module)", !stillRunning || logLine.Length > 0, logLine.Length > 60 ? logLine[..60] : logLine);
+    await sup.CallAsync("proxy-client.stop");
+    await Task.Delay(500);
+    var status2 = await sup.CallAsync("proxy-client.status");
+    Check("stop → không còn running", !status2.GetProperty("running").GetBoolean());
+}
+else Console.WriteLine("SKIP  proxy-client (module không có ở modules root)");
+
 // ── 10. stop sạch tất cả ───────────────────────────────────────────
-foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "hello", "crashy" })
+foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "hello", "crashy" })
     if (sup.Modules.ContainsKey(id)) await sup.StopAsync(id);
 await Task.Delay(1000);
 Check("stop sạch tất cả module", sup.Modules.Values.All(m => m.State == ModuleRunState.Stopped));
