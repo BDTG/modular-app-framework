@@ -372,16 +372,17 @@ Giai đoạn 2 (✅ XONG 16/08): Port Zapret-DPI-Bypass-Wrapper — 3 module
     init — trước chỉ gọi khi AutoStart), blockcheck spawn cmd cần Redirect std
     streams (cygwin bash fail im lặng khi không có pipe)
 
-Giai đoạn 3 (đang làm):  Module `proxy-client` (✅ scaffold 16/08)
-  - Bọc **sing-box** 1.13: TUN mode toàn hệ thống + outbound **VLESS+REALITY** /
-    **Hysteria2**; ops: buildConfig (sinh config chuẩn sing-box 1.13 — DNS format mới,
-    utls fingerprint, reality keypair), check (`sing-box check`), start/stop/status
-    (redirect log, kill tree); cần admin cho TUN
-  - Repo: BDTG/proxy-client-module; SmokeTest 30/30 PASS (fail-graceful khi không admin)
-  - ⏳ Còn lại: test với VPS node thật (VLESS-REALITY/Hysteria2), tích hợp chọn node
-    theo `profiles`, nút "1 bấm 2 lớp" (zapret-engine + proxy-client)
-  - Sau: Port MyOptimizationTool, 1000-IN-ONE thành module
-  - Mỗi tweak = 1 module con (hoặc 1 module "tweaks" với từng action nhỏ)
+Giai đoạn 3 (đang làm):  Module `proxy-client` (✅ scaffold 16/08) + `tweaks` (✅ 16/08)
+  - `proxy-client`: bọc **sing-box** 1.13 (TUN + VLESS-REALITY/Hysteria2) — repo
+    BDTG/proxy-client-module; SmokeTest 30/30 PASS
+  - `tweaks`: port **MyOptimizationTool/1000INONE** (TweakScriptExecutor) — registry
+    tweaks JSON-driven (network-tweaks.json 9 tweaks nguyên bản + system 3 HKCU),
+    ops list/apply/applyGroup/status/**rollback** (backup trước khi set) — repo
+    BDTG/tweaks-module; SmokeTest 36/36 PASS (apply+rollback thật, HKLM fail-graceful)
+  - ⏳ Còn lại: test proxy-client với VPS node thật; tích hợp chọn node theo `profiles`,
+    nút "1 bấm 2 lớp" (AppHost đã có panel — chạy elevated là dùng được)
+  - Sau: port tiếp 1000INONE modules khác (startup-manager, system-cleanup, appx-manager,
+    game-boost...) — mỗi cái 1 module, cùng pattern JSON+backup
 ```
 
 ### Cấu trúc multi-repo (từ 16/08/2026)
