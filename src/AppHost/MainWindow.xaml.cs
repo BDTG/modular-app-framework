@@ -149,6 +149,7 @@ public partial class MainWindow : Window
             LogTitle.Text = $"Log — {inst.Manifest.Id}";
             LogPath.Text = inst.LogFile;
             RefreshLog();
+            UpdateOps();
         }
     }
 
@@ -176,6 +177,155 @@ public partial class MainWindow : Window
     // ── 🛡️ Chống DPI 2 lớp ─────────────────────────────────────────
     private static string NodeFile => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mf-profiles", "node.json");
+
+    // ── Module ops explorer ─────────────────────────────────────────
+    private static readonly Dictionary<string, Dictionary<string, string>> ModuleOps = new()
+    {
+        ["tweaks"] = new()
+        {
+            ["list"] = "Danh sách tweaks (9 network + 3 system)",
+            ["apply"] = "Áp tweak — {\"index\": 0}",
+            ["applyGroup"] = "Áp nhóm — {\"group\": \"network\" | \"system\"}",
+            ["status"] = "Trạng thái (applied?) — {\"index\": 0}",
+            ["rollback"] = "Khôi phục giá trị cũ — {\"index\": 0}",
+        },
+        ["startup-manager"] = new()
+        {
+            ["list"] = "Liệt kê startup (Run keys + folders)",
+            ["set"] = "Bật/tắt — {\"index\": 0, \"enabled\": false}",
+        },
+        ["appx-manager"] = new()
+        {
+            ["list"] = "Trạng thái 17 nhóm UWP packages",
+            ["remove"] = "Gỡ package (cần admin) — {\"pattern\": \"Microsoft.Clipchamp*\"}",
+            ["clearCache"] = "Reset-AppxPackage — {\"pattern\": \"...\"}",
+        },
+        ["system-cleanup"] = new()
+        {
+            ["scan"] = "Dung lượng từng target (temp/prefetch/bin)",
+            ["clean"] = "Dọn file tạm (trả MB đã giải phóng)",
+            ["emptyBin"] = "Dọn thùng rác",
+        },
+        ["blockcheck"] = new()
+        {
+            ["run"] = "Quét DPI strategy — {\"domain\": \"tiktok.com\", \"ipv4\": true, \"ipv6\": false}",
+            ["poll"] = "Trạng thái quét (running? strategies?)",
+            ["cancel"] = "Hủy quét đang chạy",
+        },
+        ["zapret-engine"] = new()
+        {
+            ["start"] = "Bật winws2 (dùng enginePath trong config)",
+            ["stop"] = "Tắt engine",
+            ["status"] = "Trạng thái engine + dòng log cuối",
+        },
+        ["proxy-client"] = new()
+        {
+            ["buildConfig"] = "Sinh config sing-box — {\"type\":\"vless-reality\",\"server\":\"1.2.3.4\",\"port\":443,\"uuid\":\"...\",\"sni\":\"...\",\"publicKey\":\"...\",\"shortId\":\"...\"}",
+            ["check"] = "Validate config bằng sing-box — {\"config\": \"<json string>\"}",
+            ["start"] = "Start sing-box — {\"config\": \"<json string>\"}",
+            ["stop"] = "Stop sing-box",
+            ["status"] = "Trạng thái proxy",
+        },
+        ["profiles"] = new()
+        {
+            ["list"] = "Danh sách profile",
+            ["apply"] = "Áp profile theo WiFi/domain hiện tại",
+        },
+        ["game-boost"] = new()
+        {
+            ["boost"] = "Stop services (+kill explorer max) — {\"mode\": \"normal\" | \"max\"}",
+            ["restore"] = "Khôi phục services + explorer",
+            ["status"] = "Trạng thái boost hiện tại",
+        },
+        ["components-remover"] = new()
+        {
+            ["list"] = "5 scripts (Edge/OneDrive/Defender/...)",
+            ["run"] = "Chạy script (cần admin) — {\"id\": \"RemovePCHealthCheck\"}",
+        },
+        ["android-tools"] = new()
+        {
+            ["devices"] = "Danh sách thiết bị ADB",
+            ["shell"] = "Lệnh shell — {\"cmd\": \"getprop ro.product.model\"}",
+            ["killServer"] = "adb kill-server",
+        },
+        ["windows-activation"] = new()
+        {
+            ["status"] = "Trạng thái kích hoạt (WMI)",
+            ["edition"] = "Thông tin edition/build",
+            ["listMethods"] = "4 phương thức MAS (hwid/ohook/kms/tsforge)",
+            ["activate"] = "Chạy MAS script (cần admin) — {\"method\": \"hwid\"}",
+            ["traces"] = "Dò dấu vết activation (KMS task/folder/sppc.dll)",
+            ["cleanKms"] = "Dọn dấu vết KMS — {\"dryRun\": true}",
+        },
+        ["hello"] = new()
+        {
+            ["echo"] = "Echo lại text — {\"text\": \"xin chao\"}",
+        },
+        ["crashy"] = new()
+        {
+            ["boom"] = "Ném exception (demo cách ly)",
+            ["exit"] = "Environment.Exit (demo)",
+            ["hang"] = "Treo 30s (demo)",
+        },
+    };
+
+    private void UpdateOps()
+    {
+        if (_selectedId == null) { OpsList.ItemsSource = null; return; }
+        if (ModuleOps.TryGetValue(_selectedId, out var ops))
+        {
+            OpsTitle.Text = $"Ops — {_selectedId}";
+            OpsList.ItemsSource = ops.Keys.ToList();
+        }
+        else
+        {
+            OpsTitle.Text = $"Ops — {_selectedId} (chưa có mô tả)";
+            OpsList.ItemsSource = null;
+        }
+        OpsHint.Text = "Chọn một op để điền tên, nhập args JSON rồi bấm Chạy.";
+    }
+
+    private void OpsList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (OpsList.SelectedItem is string op && _selectedId != null && ModuleOps.TryGetValue(_selectedId, out var ops))
+        {
+            OpBox.Text = op;
+            OpsDesc.Text = ops[op];
+        }
+    }
+
+    private async void RunOp_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_selectedId == null) { ResultBox.Text = "Chọn một module ở bảng trái trước."; return; }
+            string op = OpBox.Text.Trim();
+            if (op.Length == 0) { ResultBox.Text = "Nhập tên op (hoặc chọn từ danh sách)."; return; }
+            var sup = EnsureSupervisor();
+            if (!sup.Modules.ContainsKey(_selectedId)) { ResultBox.Text = $"Module '{_selectedId}' không tồn tại."; return; }
+            if (sup.Modules[_selectedId].State != ModuleRunState.Running)
+            {
+                StatusText.Text = $"▶ start {_selectedId}...";
+                await sup.StartAsync(_selectedId);
+            }
+            JsonElement args = JsonSerializer.SerializeToElement(new { });
+            string argsText = ArgsBox.Text.Trim();
+            if (argsText.Length > 0)
+            {
+                using var doc = JsonDocument.Parse(argsText);
+                args = doc.RootElement.Clone();
+            }
+            var result = await sup.CallAsync($"{_selectedId}.{op}", args);
+            string pretty = JsonSerializer.Serialize(JsonDocument.Parse(result.GetRawText()).RootElement,
+                new JsonSerializerOptions { WriteIndented = true });
+            ResultBox.Text = pretty;
+            StatusText.Text = $"✓ {_selectedId}.{op} — xem kết quả bên phải";
+        }
+        catch (Exception ex)
+        {
+            ResultBox.Text = $"Lỗi: {ex.GetType().Name} — {ex.Message}";
+        }
+    }
 
     private void LoadNode()
     {

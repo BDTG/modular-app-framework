@@ -374,27 +374,97 @@
                 </DataGrid>
             </Border>
 
-            <!-- Log panel -->
-            <Border Grid.Column="1" Margin="10,0,0,0" Background="{StaticResource BgSurface}"
-                    BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1" CornerRadius="8" Padding="0">
-                <DockPanel>
-                    <DockPanel DockPanel.Dock="Top" Margin="10,8,8,6">
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Button x:Name="PauseLogBtn" Content="Pause" Click="PauseLog_Click" Padding="8,3" Margin="4,0,0,0" FontSize="11" Style="{StaticResource GhostBtn}"/>
-                            <Button x:Name="ClearLogBtn" Content="Clear" Click="ClearLog_Click" Padding="8,3" Margin="4,0,0,0" FontSize="11" Style="{StaticResource GhostBtn}"/>
-                        </StackPanel>
-                        <StackPanel>
-                            <TextBlock x:Name="LogTitle" Text="Log — chọn một module" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock x:Name="LogPath" Text="" FontSize="10.5" FontFamily="Cascadia Mono, Consolas" Foreground="{StaticResource TextQuaternary}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                        </StackPanel>
-                    </DockPanel>
-                    <Border Background="{StaticResource BgInset}" BorderThickness="1" BorderBrush="{StaticResource BorderSubtle}" CornerRadius="0,0,7,7" Margin="1,0,1,1">
-                        <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Cascadia Mono, Consolas" FontSize="11.5"
-                                 Background="Transparent" Foreground="#C9CDD6" VerticalScrollBarVisibility="Auto"
-                                 TextWrapping="NoWrap" BorderThickness="0" Padding="10,8"/>
+            <!-- Log + Ops tabs -->
+            <TabControl Grid.Column="1" Margin="10,0,0,0" Background="Transparent" BorderThickness="0">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border x:Name="bd" Background="Transparent" Padding="12,5" Margin="0,0,2,0" CornerRadius="6,6,0,0" BorderThickness="1" BorderBrush="Transparent">
+                                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="bd" Property="Background" Value="{StaticResource BgSurface}"/>
+                                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BorderSubtle}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- Tab: Log -->
+                <TabItem Header="Log">
+                    <Border Background="{StaticResource BgSurface}" BorderBrush="{StaticResource BorderSubtle}"
+                            BorderThickness="1" CornerRadius="0,8,8,8" Padding="0">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="10,8,8,6">
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                    <Button x:Name="PauseLogBtn" Content="Pause" Click="PauseLog_Click" Padding="8,3" Margin="4,0,0,0" FontSize="11" Style="{StaticResource GhostBtn}"/>
+                                    <Button x:Name="ClearLogBtn" Content="Clear" Click="ClearLog_Click" Padding="8,3" Margin="4,0,0,0" FontSize="11" Style="{StaticResource GhostBtn}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock x:Name="LogTitle" Text="Log — chọn một module" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                                    <TextBlock x:Name="LogPath" Text="" FontSize="10.5" FontFamily="Cascadia Mono, Consolas" Foreground="{StaticResource TextQuaternary}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </DockPanel>
+                            <Border Background="{StaticResource BgInset}" BorderThickness="1" BorderBrush="{StaticResource BorderSubtle}" CornerRadius="0,0,7,7" Margin="1,0,1,1">
+                                <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Cascadia Mono, Consolas" FontSize="11.5"
+                                         Background="Transparent" Foreground="#C9CDD6" VerticalScrollBarVisibility="Auto"
+                                         TextWrapping="NoWrap" BorderThickness="0" Padding="10,8"/>
+                            </Border>
+                        </DockPanel>
                     </Border>
-                </DockPanel>
-            </Border>
+                </TabItem>
+
+                <!-- Tab: Module Ops -->
+                <TabItem Header="Ops">
+                    <Border Background="{StaticResource BgSurface}" BorderBrush="{StaticResource BorderSubtle}"
+                            BorderThickness="1" CornerRadius="0,8,8,8" Padding="10">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" x:Name="OpsTitle" Text="Ops — chọn module ở bảng trái" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,2,0,4"/>
+                            <TextBlock DockPanel.Dock="Top" x:Name="OpsHint" Text="Chọn một op để điền tên, nhập args JSON rồi bấm Chạy." FontSize="10.5" Foreground="{StaticResource TextQuaternary}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <ListBox x:Name="OpsList" Grid.Row="0" MaxHeight="110" Background="{StaticResource BgInset}" Foreground="{StaticResource TextSecondary}"
+                                         BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1" FontFamily="Cascadia Mono, Consolas" FontSize="11.5"
+                                         SelectionChanged="OpsList_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                                <TextBlock x:Name="OpsDesc" Grid.Row="1" Text="" FontSize="10.5" Foreground="{StaticResource TextTertiary}" TextWrapping="Wrap" Margin="0,5,0,0" MaxHeight="30"/>
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                                    <TextBlock Text="op" FontSize="11" Foreground="{StaticResource TextQuaternary}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBox x:Name="OpBox" Width="210" Style="{StaticResource MfInput}" FontFamily="Cascadia Mono, Consolas" FontSize="11.5"/>
+                                    <Button x:Name="RunOpBtn" Content="▶ Chạy op" Click="RunOp_Click" Style="{StaticResource PrimaryBtn}" Margin="6,0,0,0" Padding="10,4" FontSize="11.5"/>
+                                </StackPanel>
+                                <TextBlock Grid.Row="3" Text="args (JSON — bỏ trống nếu không cần)" FontSize="10.5" Foreground="{StaticResource TextQuaternary}" Margin="0,8,0,2"/>
+                                <TextBox x:Name="ArgsBox" Grid.Row="4" Height="56" Style="{StaticResource MfInput}" AcceptsReturn="True"
+                                         FontFamily="Cascadia Mono, Consolas" FontSize="11.5" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"/>
+                                <TextBlock Grid.Row="5" Text="kết quả" FontSize="10.5" Foreground="{StaticResource TextQuaternary}" Margin="0,8,0,2"/>
+                                <Border Grid.Row="5" Margin="0,24,0,0" Background="{StaticResource BgInset}" BorderThickness="1" BorderBrush="{StaticResource BorderSubtle}" CornerRadius="6">
+                                    <TextBox x:Name="ResultBox" IsReadOnly="True" FontFamily="Cascadia Mono, Consolas" FontSize="11"
+                                             Background="Transparent" Foreground="#A6E3A1" VerticalScrollBarVisibility="Auto"
+                                             TextWrapping="NoWrap" BorderThickness="0" Padding="8,6"/>
+                                </Border>
+                            </Grid>
+                        </DockPanel>
+                    </Border>
+                </TabItem>
+            </TabControl>
         </Grid>
 
         <!-- ── Demo crashy ───────────────────────────────────────── -->
