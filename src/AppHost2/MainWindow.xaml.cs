@@ -131,17 +131,25 @@ public sealed partial class MainWindow : Window
     private void Navigate(string tag)
     {
         if (tag == "home")
-        {
             ContentFrame.Navigate(typeof(Pages.HomePage), _sup);
-        }
         else if (tag == "demo")
-        {
             ContentFrame.Navigate(typeof(Pages.DemoPage), _sup);
-        }
         else if (tag.StartsWith("module:"))
         {
             var id = tag["module:".Length..];
-            ContentFrame.Navigate(typeof(Pages.ModulePage), new object[] { _sup, id });
+            var pageType = id switch
+            {
+                "tweaks" => typeof(Pages.TweaksView),
+                "system-cleanup" => typeof(Pages.CleanupView),
+                "game-boost" => typeof(Pages.GameBoostView),
+                "windows-activation" => typeof(Pages.ActivationView),
+                "blockcheck" => typeof(Pages.BlockcheckView),
+                "components-remover" => typeof(Pages.ComponentsView),
+                "startup-manager" => typeof(Pages.StartupView),
+                "appx-manager" => typeof(Pages.AppxView),
+                _ => typeof(Pages.ModulePage),
+            };
+            ContentFrame.Navigate(pageType, new object[] { _sup, id });
         }
     }
 

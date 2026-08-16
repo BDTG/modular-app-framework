@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<local:ModuleViewBase
+    x:Class="AppHost2.Pages.GameBoostView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:AppHost2.Pages"
+    mc:Ignorable="d">
+    <Grid Padding="24" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="Game Boost" Style="{ThemeResource TitleTextBlockStyle}"/>
+            <TextBlock Text="Tạm dừng services + tắt Explorer để tối ưu RAM/CPU khi chơi game. Khôi phục bằng 1 nút." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
+        </StackPanel>
+
+        <!-- Trạng thái hiện tại -->
+        <Border Grid.Row="1" Padding="20,16" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefault}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <StackPanel Spacing="8">
+                <TextBlock Text="TRẠNG THÁI" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" FontWeight="SemiBold"/>
+                <TextBlock x:Name="BoostState" Text="Chưa boost" FontSize="18" FontWeight="SemiBold"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Services đã dừng:" Opacity="0.7" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StoppedServices" Text="" VerticalAlignment="Center" FontFamily="Consolas"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Explorer:" Opacity="0.7" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ExplorerState" Text="đang chạy" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Chế độ boost -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12">
+            <ToggleButton x:Name="MaxModeChk" Content="Chế độ tối đa (kill Explorer + WSearch + Spooler)" Padding="14,6"/>
+            <Button x:Name="BoostBtn" Content="🚀 Boost" Click="BoostBtn_Click" Style="{ThemeResource AccentButtonStyle}" Padding="20,8"/>
+            <Button x:Name="RestoreBtn" Content="↩ Khôi phục" Click="RestoreBtn_Click" Padding="20,8"/>
+            <ProgressRing x:Name="LoadRing" IsActive="False" Width="22" Height="22"/>
+        </StackPanel>
+
+        <!-- Log -->
+        <TextBox Grid.Row="3" x:Name="LogBox" IsReadOnly="True" FontFamily="Consolas" FontSize="12" TextWrapping="NoWrap" PlaceholderText="(log)" BorderThickness="0,1,0,0" Padding="0,12,0,0"/>
+    </Grid>
+</local:ModuleViewBase>
