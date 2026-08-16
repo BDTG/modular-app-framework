@@ -13,18 +13,14 @@ public sealed partial class MainWindow : Window
     private ModuleSupervisor? _sup;
     private string _modulesRoot = "C:\\Users\\BDTG\\Projects\\mf-all";
     private readonly DispatcherQueue _dq = DispatcherQueue.GetForCurrentThread();
-    private readonly DispatcherTimer _statsTimer;
 
     public MainWindow()
     {
         InitializeComponent();
         SystemBackdrop = new MicaBackdrop();
         Title = "Modular Framework — AppHost";
-
-        _statsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _statsTimer.Tick += (_, _) => UpdateStats();
-        _statsTimer.Start();
-
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
         Activated += (_, _) => EnsureLoaded();
     }
 
@@ -46,7 +42,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            StatsText.Text = ex.Message;
+            System.Diagnostics.Debug.WriteLine($"AppHost2: {ex}");
         }
     }
 
@@ -67,16 +63,6 @@ public sealed partial class MainWindow : Window
         return _sup;
     }
 
-    private void UpdateStats()
-    {
-        if (_sup == null) return;
-        var all = _sup.Modules.Values.ToList();
-        int running = all.Count(m => m.State == ModuleRunState.Running);
-        int stopped = all.Count(m => m.State == ModuleRunState.Stopped);
-        int disabled = all.Count(m => m.State == ModuleRunState.Disabled);
-        StatsText.Text = $"● {all.Count} module · ● {running} chạy · ● {stopped} tắt · ● {disabled} disabled";
-    }
-
     private async Task StartAllAsync()
     {
         try
@@ -85,7 +71,7 @@ public sealed partial class MainWindow : Window
             foreach (var id in sup.Modules.Keys.ToList())
                 await sup.StartAsync(id);
         }
-        catch (Exception ex) { StatsText.Text = ex.Message; }
+        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"AppHost2: {ex}"); }
     }
 
     private async void StopAll_Click(object sender, RoutedEventArgs e)
@@ -96,7 +82,7 @@ public sealed partial class MainWindow : Window
             foreach (var id in _sup.Modules.Keys.ToList())
                 await _sup.StopAsync(id);
         }
-        catch (Exception ex) { StatsText.Text = ex.Message; }
+        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"AppHost2: {ex}"); }
     }
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -152,7 +138,6 @@ public sealed partial class MainWindow : Window
         try
         {
             _sup?.Rescan();
-            UpdateStats();
         }
         catch { }
     }

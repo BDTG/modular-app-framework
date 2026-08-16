@@ -7,10 +7,21 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Modular Framework — AppHost">
-    <NavigationView x:Name="NavView"
-                    PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="False"
-                    PaneTitle="MODULAR FRAMEWORK" OpenPaneLength="248" CompactModeThresholdWidth="700"
-                    ItemInvoked="NavView_ItemInvoked" SelectionChanged="NavView_SelectionChanged">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title bar (drag region) — đồng màu app -->
+        <Border x:Name="AppTitleBar" Grid.Row="0" Height="36" Background="Transparent">
+            <TextBlock Text="Modular Framework — AppHost" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+        </Border>
+
+        <NavigationView x:Name="NavView" Grid.Row="1"
+                        PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="False"
+                        PaneTitle="MODULAR FRAMEWORK" OpenPaneLength="248" CompactModeThresholdWidth="700"
+                        ItemInvoked="NavView_ItemInvoked" SelectionChanged="NavView_SelectionChanged">
         <NavigationView.MenuItems>
             <NavigationViewItem Content="DPI 2 lớp" Tag="home">
                 <NavigationViewItem.Icon>
@@ -36,11 +47,7 @@
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>
-        <NavigationView.FooterMenuItems>
-            <NavigationViewItem>
-                <TextBlock x:Name="StatsText" Text="" FontSize="12" Opacity="0.7" Margin="0,2,0,6"/>
-            </NavigationViewItem>
-        </NavigationView.FooterMenuItems>
         <Frame x:Name="ContentFrame"/>
-    </NavigationView>
-</Window>
+        </NavigationView>
+        </Grid>
+        </Window>
