@@ -118,8 +118,3 @@ repo; AppHost Settings → Modules root trỏ vào đó.
 **Dependency:** module repos dùng `PackageReference FrameworkSDK` qua NuGet local
 feed (`C:\Users\BDTG\mf-local-feed`). Framework đổi → `src/scripts/publish_local_feed.ps1`
 (pack + push) → module bump version nếu cần.
-
----
-
-Tài liệu liên quan: [docs/DPI-BYPASS-RESEARCH.md](docs/DPI-BYPASS-RESEARCH.md) —
-nghiên cứu DPI bypass (zapret2, blockcheck2, protocols) đã làm trước khi xây framework.
