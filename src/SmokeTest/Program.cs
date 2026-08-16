@@ -309,8 +309,58 @@ if (sup.Modules.ContainsKey("system-cleanup"))
 }
 else Console.WriteLine("SKIP  system-cleanup (module không có ở modules root)");
 
+// ── 9f. game-boost / components-remover / android-tools / windows-activation ──
+if (sup.Modules.ContainsKey("game-boost"))
+{
+    await sup.StartAsync("game-boost");
+    await Task.Delay(800);
+    var gb = await sup.CallAsync("game-boost.boost", Json("mode", "normal"));
+    Check("boost normal không crash (services có thể không stop được khi không admin)", gb.GetProperty("ok").GetBoolean(), gb.TryGetProperty("error", out var gbe) ? gbe.GetString() : "");
+    var gs = await sup.CallAsync("game-boost.status");
+    Console.WriteLine($"    [boost] status: {gs.GetRawText()}");
+    var gr = await sup.CallAsync("game-boost.restore");
+    Check("restore OK", gr.GetProperty("ok").GetBoolean());
+}
+else Console.WriteLine("SKIP  game-boost (module không có ở modules root)");
+
+if (sup.Modules.ContainsKey("components-remover"))
+{
+    await sup.StartAsync("components-remover");
+    await Task.Delay(800);
+    var cl = await sup.CallAsync("components-remover.list");
+    Check("components.list = 5 scripts", cl.GetArrayLength() == 5, $"count={cl.GetArrayLength()}");
+    // RemovePCHealthCheck: file không tồn tại → bỏ qua, không lỗi (an toàn chạy thật)
+    var cr = await sup.CallAsync("components-remover.run", Json("id", "RemovePCHealthCheck"));
+    Check("run RemovePCHealthCheck an toàn (file vắng → skip)", cr.GetProperty("ok").GetBoolean(), cr.TryGetProperty("error", out var cre) ? cre.GetString() : "");
+}
+else Console.WriteLine("SKIP  components-remover (module không có ở modules root)");
+
+if (sup.Modules.ContainsKey("android-tools"))
+{
+    await sup.StartAsync("android-tools");
+    await Task.Delay(800);
+    var ad = await sup.CallAsync("android-tools.devices");
+    // chưa tải adb.exe → lỗi sạch (fail-graceful); nếu có adb → trả danh sách (có thể rỗng)
+    bool adbOk = ad.GetProperty("ok").GetBoolean();
+    Console.WriteLine($"    [adb] ok={adbOk} {(adbOk ? ad.GetProperty("args").GetString() : ad.GetProperty("error").GetString())}");
+    Check("android-tools devices fail-graceful (thiếu adb → lỗi rõ) HOẶC trả danh sách", adbOk || ad.GetProperty("error").GetString()!.Contains("adb.exe"));
+}
+else Console.WriteLine("SKIP  android-tools (module không có ở modules root)");
+
+if (sup.Modules.ContainsKey("windows-activation"))
+{
+    await sup.StartAsync("windows-activation");
+    await Task.Delay(800);
+    var wa = await sup.CallAsync("windows-activation.status");
+    Console.WriteLine($"    [activation] status: {wa.GetProperty("args").GetString()}");
+    var we = await sup.CallAsync("windows-activation.edition");
+    Check("edition đọc được (ProductName)", we.GetProperty("ok").GetBoolean() && we.GetProperty("args").GetString()!.Contains("productName"), we.TryGetProperty("error", out var wee) ? wee.GetString() : "");
+    Console.WriteLine($"    [activation] edition: {we.GetProperty("args").GetString()}");
+}
+else Console.WriteLine("SKIP  windows-activation (module không có ở modules root)");
+
 // ── 10. stop sạch tất cả ───────────────────────────────────────────
-foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "tweaks", "startup-manager", "appx-manager", "system-cleanup", "hello", "crashy" })
+foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "tweaks", "startup-manager", "appx-manager", "system-cleanup", "game-boost", "components-remover", "android-tools", "windows-activation", "hello", "crashy" })
     if (sup.Modules.ContainsKey(id)) await sup.StopAsync(id);
 await Task.Delay(1000);
 Check("stop sạch tất cả module", sup.Modules.Values.All(m => m.State == ModuleRunState.Stopped));
