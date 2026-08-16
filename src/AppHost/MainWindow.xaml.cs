@@ -99,10 +99,10 @@ public partial class MainWindow : Window
     {
         if (_sup == null) return;
         var all = _sup.Modules.Values.ToList();
-        int running = all.Count(m => m.State == ModuleRunState.Running);
-        int stopped = all.Count(m => m.State == ModuleRunState.Stopped);
-        int disabled = all.Count(m => m.State == ModuleRunState.Disabled);
-        StatsText.Text = $"📊 {all.Count} module · 🟢 {running} chạy · ⚪ {stopped} tắt · 🔴 {disabled} disabled";
+        StatTotal.Text = all.Count.ToString();
+        StatRunning.Text = all.Count(m => m.State == ModuleRunState.Running).ToString();
+        StatStopped.Text = all.Count(m => m.State == ModuleRunState.Stopped).ToString();
+        StatDisabled.Text = all.Count(m => m.State == ModuleRunState.Disabled).ToString();
     }
 
     private async void ModuleStart_Click(object sender, RoutedEventArgs e)
@@ -146,7 +146,8 @@ public partial class MainWindow : Window
         if (ModuleGrid.SelectedItem is ModuleInstance inst)
         {
             _selectedId = inst.Manifest.Id;
-            LogTitle.Text = $"Log: {inst.Manifest.Id} ({inst.LogFile})";
+            LogTitle.Text = $"Log — {inst.Manifest.Id}";
+            LogPath.Text = inst.LogFile;
             RefreshLog();
         }
     }
