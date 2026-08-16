@@ -11,15 +11,18 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Toolbar -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock Text="Modules root: " Foreground="#CDD6F4" VerticalAlignment="Center"/>
-            <TextBox x:Name="ModulesRootBox" Width="420" Foreground="#CDD6F4" Background="#313244"
-                     Text="C:\Users\BDTG\Projects\modular-app-framework\src\modules"/>
-            <Button x:Name="RefreshBtn" Content="Quét lại" Click="Refresh_Click" Margin="8,0,0,0" Padding="10,4"/>
-            <Button x:Name="StartAllBtn" Content="▶ Start tất cả" Click="StartAll_Click" Margin="8,0,0,0" Padding="10,4"/>
-            <Button x:Name="StopAllBtn" Content="■ Stop tất cả" Click="StopAll_Click" Margin="8,0,0,0" Padding="10,4"/>
-        </StackPanel>
+        <!-- Toolbar + Dashboard stats -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <TextBlock x:Name="StatsText" DockPanel.Dock="Right" Text="" Foreground="#A6E3A1" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="12,0,0,0"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Modules root: " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                <TextBox x:Name="ModulesRootBox" Width="420" Foreground="#CDD6F4" Background="#313244"
+                         Text="C:\Users\BDTG\Projects\modular-app-framework\src\modules"/>
+                <Button x:Name="RefreshBtn" Content="⟳ Quét lại" Click="Refresh_Click" Margin="8,0,0,0" Padding="10,4"/>
+                <Button x:Name="StartAllBtn" Content="▶ Start tất cả" Click="StartAll_Click" Margin="8,0,0,0" Padding="10,4"/>
+                <Button x:Name="StopAllBtn" Content="■ Stop tất cả" Click="StopAll_Click" Margin="8,0,0,0" Padding="10,4"/>
+            </StackPanel>
+        </DockPanel>
 
         <!-- Module list -->
         <Grid Grid.Row="1">
@@ -39,12 +42,30 @@
                     <DataGridTextColumn Header="Trạng thái" Binding="{Binding State}" Width="110"/>
                     <DataGridTextColumn Header="Restart" Binding="{Binding RestartCount}" Width="60"/>
                     <DataGridTextColumn Header="PID" Binding="{Binding Process.Id}" Width="60"/>
+                    <DataGridTemplateColumn Header="Hành động" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="▶" Width="34" Padding="0" Margin="0,0,4,0" ToolTip="Start module"
+                                            Click="ModuleStart_Click" Background="#313244" Foreground="#A6E3A1" BorderThickness="0"/>
+                                    <Button Content="■" Width="34" Padding="0" ToolTip="Stop module"
+                                            Click="ModuleStop_Click" Background="#313244" Foreground="#F38BA8" BorderThickness="0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
 
             <!-- Log viewer -->
             <DockPanel Grid.Column="1" Margin="10,0,0,0">
-                <TextBlock DockPanel.Dock="Top" x:Name="LogTitle" Text="Log (chọn module)" Foreground="#A6E3A1" Margin="0,0,0,4"/>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button x:Name="PauseLogBtn" Content="⏸ Pause" Click="PauseLog_Click" Padding="8,2" Margin="4,0,0,0" FontSize="11"/>
+                        <Button x:Name="ClearLogBtn" Content="🗑 Clear" Click="ClearLog_Click" Padding="8,2" Margin="4,0,0,0" FontSize="11"/>
+                    </StackPanel>
+                    <TextBlock x:Name="LogTitle" Text="Log (chọn module)" Foreground="#A6E3A1" VerticalAlignment="Center"/>
+                </DockPanel>
                 <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Consolas" FontSize="11"
                          Background="#11111B" Foreground="#CDD6F4" VerticalScrollBarVisibility="Auto"
                          TextWrapping="NoWrap"/>

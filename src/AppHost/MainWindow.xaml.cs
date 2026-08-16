@@ -13,12 +13,17 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _logTimer;
     private string? _selectedId;
     private string _lastLogTail = "";
+    private bool _logPaused;
 
     public MainWindow()
     {
         InitializeComponent();
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _refreshTimer.Tick += (_, _) => ModuleGrid.Items.Refresh();
+        _refreshTimer.Tick += (_, _) =>
+        {
+            ModuleGrid.Items.Refresh();
+            UpdateStats();
+        };
         _refreshTimer.Start();
 
         _logTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -90,6 +95,52 @@ public partial class MainWindow : Window
         catch (Exception ex) { MessageBox.Show(ex.Message, "Lỗi"); }
     }
 
+    private void UpdateStats()
+    {
+        if (_sup == null) return;
+        var all = _sup.Modules.Values.ToList();
+        int running = all.Count(m => m.State == ModuleRunState.Running);
+        int stopped = all.Count(m => m.State == ModuleRunState.Stopped);
+        int disabled = all.Count(m => m.State == ModuleRunState.Disabled);
+        StatsText.Text = $"📊 {all.Count} module · 🟢 {running} chạy · ⚪ {stopped} tắt · 🔴 {disabled} disabled";
+    }
+
+    private async void ModuleStart_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (((FrameworkElement)sender).DataContext is not ModuleInstance inst) return;
+            var sup = EnsureSupervisor();
+            await sup.StartAsync(inst.Manifest.Id);
+            StatusText.Text = $"▶ {inst.Manifest.Id}: {sup.Modules[inst.Manifest.Id].State}";
+        }
+        catch (Exception ex) { MessageBox.Show(ex.Message, "Lỗi start"); }
+    }
+
+    private async void ModuleStop_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (((FrameworkElement)sender).DataContext is not ModuleInstance inst) return;
+            var sup = EnsureSupervisor();
+            await sup.StopAsync(inst.Manifest.Id);
+            StatusText.Text = $"■ {inst.Manifest.Id}: stopped";
+        }
+        catch (Exception ex) { MessageBox.Show(ex.Message, "Lỗi stop"); }
+    }
+
+    private void PauseLog_Click(object sender, RoutedEventArgs e)
+    {
+        _logPaused = !_logPaused;
+        PauseLogBtn.Content = _logPaused ? "▶ Resume" : "⏸ Pause";
+    }
+
+    private void ClearLog_Click(object sender, RoutedEventArgs e)
+    {
+        LogBox.Clear();
+        _lastLogTail = "";
+    }
+
     private void ModuleGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (ModuleGrid.SelectedItem is ModuleInstance inst)
@@ -102,11 +153,11 @@ public partial class MainWindow : Window
 
     private void RefreshLog()
     {
-        if (_selectedId == null || _sup == null || !_sup.Modules.TryGetValue(_selectedId, out var inst)) return;
+        if (_logPaused || _selectedId == null || _sup == null || !_sup.Modules.TryGetValue(_selectedId, out var inst)) return;
         try
         {
             if (!File.Exists(inst.LogFile)) { LogBox.Text = "(chưa có log)"; return; }
-            var tail = string.Join("\n", File.ReadLines(inst.LogFile).TakeLast(200));
+            var tail = string.Join("\n", File.ReadLines(inst.LogFile).TakeLast(500));
             if (tail != _lastLogTail)
             {
                 _lastLogTail = tail;
