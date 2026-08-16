@@ -119,13 +119,6 @@ repo; AppHost Settings → Modules root trỏ vào đó.
 feed (`C:\Users\BDTG\mf-local-feed`). Framework đổi → `src/scripts/publish_local_feed.ps1`
 (pack + push) → module bump version nếu cần.
 
-## Roadmap
-
-- [ ] Test proxy-client với VPS node thật (VLESS-REALITY / Hysteria2)
-- [ ] BlockcheckView/ComponentsView/StartupView/AppxView nâng cấp view chuyên biệt
-- [ ] media-downloader (yt-dlp wrapper) — 1000INONE còn lại
-- [ ] Tray icon + auto-start AppHost
-
 ---
 
 Tài liệu liên quan: [docs/DPI-BYPASS-RESEARCH.md](docs/DPI-BYPASS-RESEARCH.md) —
