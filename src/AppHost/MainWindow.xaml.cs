@@ -21,8 +21,9 @@ public partial class MainWindow : Window
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _refreshTimer.Tick += (_, _) =>
         {
-            ModuleGrid.Items.Refresh();
+            ModuleList.Items.Refresh();
             UpdateStats();
+            UpdateDetailHeader();
         };
         _refreshTimer.Start();
 
@@ -35,7 +36,7 @@ public partial class MainWindow : Window
             try
             {
                 var sup = EnsureSupervisor();
-                ModuleGrid.ItemsSource = sup.Modules.Values.ToList();
+                ModuleList.ItemsSource = sup.Modules.Values.ToList();
                 StatusText.Text = $"Đã scan {sup.Modules.Count} module — bấm '▶ Start tất cả' để chạy";
                 LoadNode();
             }
@@ -61,7 +62,7 @@ public partial class MainWindow : Window
                 StatusText.Text = $"{inst.Manifest.Id}: {inst.State}" + (inst.LastError is null ? "" : $" — {inst.LastError}");
                 if (_selectedId == inst.Manifest.Id) RefreshLog();
             });
-        ModuleGrid.ItemsSource = _sup.Modules.Values.ToList();
+        ModuleList.ItemsSource = _sup.Modules.Values.ToList();
         return _sup;
     }
 
@@ -70,7 +71,8 @@ public partial class MainWindow : Window
         _sup?.Dispose();
         _sup = null;
         EnsureSupervisor();
-        ModuleGrid.ItemsSource = _sup.Modules.Values.ToList();
+        ModuleList.ItemsSource = _sup.Modules.Values.ToList();
+        _selectedId = null;
     }
 
     private async void StartAll_Click(object sender, RoutedEventArgs e)
@@ -109,10 +111,10 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (((FrameworkElement)sender).DataContext is not ModuleInstance inst) return;
+            if (_selectedId == null) return;
             var sup = EnsureSupervisor();
-            await sup.StartAsync(inst.Manifest.Id);
-            StatusText.Text = $"▶ {inst.Manifest.Id}: {sup.Modules[inst.Manifest.Id].State}";
+            await sup.StartAsync(_selectedId);
+            StatusText.Text = $"▶ {_selectedId}: {sup.Modules[_selectedId].State}";
         }
         catch (Exception ex) { MessageBox.Show(ex.Message, "Lỗi start"); }
     }
@@ -121,10 +123,10 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (((FrameworkElement)sender).DataContext is not ModuleInstance inst) return;
+            if (_selectedId == null) return;
             var sup = EnsureSupervisor();
-            await sup.StopAsync(inst.Manifest.Id);
-            StatusText.Text = $"■ {inst.Manifest.Id}: stopped";
+            await sup.StopAsync(_selectedId);
+            StatusText.Text = $"■ {_selectedId}: stopped";
         }
         catch (Exception ex) { MessageBox.Show(ex.Message, "Lỗi stop"); }
     }
@@ -141,16 +143,37 @@ public partial class MainWindow : Window
         _lastLogTail = "";
     }
 
-    private void ModuleGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    private void ModuleList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        if (ModuleGrid.SelectedItem is ModuleInstance inst)
+        if (ModuleList.SelectedItem is ModuleInstance inst)
         {
             _selectedId = inst.Manifest.Id;
             LogTitle.Text = $"Log — {inst.Manifest.Id}";
             LogPath.Text = inst.LogFile;
             RefreshLog();
             UpdateOps();
+            UpdateDetailHeader();
         }
+    }
+
+    private void UpdateDetailHeader()
+    {
+        if (_selectedId == null || _sup == null || !_sup.Modules.TryGetValue(_selectedId, out var inst))
+        {
+            ModTitle.Text = "Chọn một module";
+            ModState.Text = "";
+            ModPid.Text = "";
+            return;
+        }
+        ModTitle.Text = inst.Manifest.DisplayName;
+        ModState.Text = inst.State.ToString();
+        ModPid.Text = inst.Process?.Id is > 0 ? $"pid {inst.Process.Id}" : "";
+        ModState.Foreground = inst.State switch
+        {
+            ModuleRunState.Running => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x10, 0xB9, 0x81)),
+            ModuleRunState.Disabled => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xF8, 0x51, 0x49)),
+            _ => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x8A, 0x8F, 0x98)),
+        };
     }
 
     private void RefreshLog()

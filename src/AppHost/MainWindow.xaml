@@ -1,7 +1,7 @@
 <Window x:Class="AppHost.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Modular Framework — AppHost" Height="680" Width="1020" MinHeight="560" MinWidth="880"
+        Title="Modular Framework — AppHost" Height="860" Width="1360" MinHeight="640" MinWidth="1120"
         WindowStartupLocation="CenterScreen" Background="#0F1011"
         FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13" Foreground="#D0D6E0">
     <Window.Resources>
@@ -306,76 +306,90 @@
         <!-- ── Content: module grid + log panel ──────────────────── -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="264"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="380"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Sidebar: danh sách module (kiểu navigation) -->
             <Border Grid.Column="0" Background="{StaticResource BgSurface}" BorderBrush="{StaticResource BorderSubtle}"
-                    BorderThickness="1" CornerRadius="8" Padding="1">
-                <DataGrid x:Name="ModuleGrid" AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single" Background="Transparent" Foreground="{StaticResource TextSecondary}"
-                          GridLinesVisibility="None" HeadersVisibility="Column" CanUserResizeRows="False"
-                          CanUserAddRows="False" BorderThickness="0" RowStyle="{StaticResource MfGridRow}"
-                          ColumnHeaderStyle="{StaticResource MfGridColHeader}" CellStyle="{StaticResource MfGridCell}"
-                          SelectionChanged="ModuleGrid_SelectionChanged" RowHeight="30">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Manifest.Id}" Width="95"/>
-                        <DataGridTextColumn Header="Module" Binding="{Binding Manifest.DisplayName}" Width="*"/>
-                        <DataGridTemplateColumn Header="State" Width="86">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding State}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding State}" Value="Running">
-                                                        <Setter Property="Foreground" Value="{StaticResource Success}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding State}" Value="Starting">
-                                                        <Setter Property="Foreground" Value="{StaticResource Warn}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding State}" Value="Restarting">
-                                                        <Setter Property="Foreground" Value="{StaticResource Warn}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding State}" Value="Disabled">
-                                                        <Setter Property="Foreground" Value="{StaticResource Danger}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Restart" Binding="{Binding RestartCount}" Width="56"/>
-                        <DataGridTemplateColumn Header="PID" Width="62">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Process.Id}" FontFamily="Cascadia Mono, Consolas" FontSize="11.5" Foreground="{StaticResource TextTertiary}" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="" Width="84">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Button Content="▶" Width="30" Height="22" Padding="0" Margin="0,0,4,0" ToolTip="Start module"
-                                                Click="ModuleStart_Click" Background="#1B1C1F" Foreground="#10B981" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
-                                                FontSize="10"/>
-                                        <Button Content="■" Width="30" Height="22" Padding="0" ToolTip="Stop module"
-                                                Click="ModuleStop_Click" Background="#1B1C1F" Foreground="#F85149" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
-                                                FontSize="10"/>
+                    BorderThickness="1" CornerRadius="8" Padding="0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="MODULES" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextQuaternary}" Margin="12,10,12,6"/>
+                    <ListBox x:Name="ModuleList" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextSecondary}"
+                             SelectionChanged="ModuleList_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="10,8"/>
+                                <Setter Property="Margin" Value="4,1"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="bd" Property="Background" Value="#5E6AD233"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Background" Value="#28282C66"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="{StaticResource TextQuaternary}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding State}" Value="Running">
+                                                            <Setter Property="Fill" Value="{StaticResource Success}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding State}" Value="Starting">
+                                                            <Setter Property="Fill" Value="{StaticResource Warn}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding State}" Value="Restarting">
+                                                            <Setter Property="Fill" Value="{StaticResource Warn}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding State}" Value="Disabled">
+                                                            <Setter Property="Fill" Value="{StaticResource Danger}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <TextBlock Text="{Binding Manifest.Id}" FontSize="13.5" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                                    <TextBlock Text="{Binding Manifest.DisplayName}" FontSize="11" Foreground="{StaticResource TextTertiary}" TextTrimming="CharacterEllipsis" Margin="16,2,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
             </Border>
 
+            <!-- Main: detail header + tabs -->
+            <DockPanel Grid.Column="1" Margin="12,0,0,0">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock x:Name="ModTitle" Text="Chọn một module" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                    <Border x:Name="ModStateBadge" Background="#1B1C1F" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1" CornerRadius="999" Padding="9,3" Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="ModState" Text="" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextTertiary}"/>
+                    </Border>
+                    <TextBlock x:Name="ModPid" Text="" FontFamily="Cascadia Mono, Consolas" FontSize="11.5" Foreground="{StaticResource TextQuaternary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <Button x:Name="ModStartBtn" Content="▶ Start" Click="ModuleStart_Click" Style="{StaticResource PrimaryBtn}" Margin="14,0,0,0" Padding="12,4" FontSize="12"/>
+                    <Button x:Name="ModStopBtn" Content="■ Stop" Click="ModuleStop_Click" Style="{StaticResource DangerBtn}" Margin="6,0,0,0" Padding="12,4" FontSize="12"/>
+                </StackPanel>
+
             <!-- Log + Ops tabs -->
-            <TabControl Grid.Column="1" Margin="10,0,0,0" Background="Transparent" BorderThickness="0">
+            <TabControl Background="Transparent" BorderThickness="0">
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
@@ -465,6 +479,7 @@
                     </Border>
                 </TabItem>
             </TabControl>
+            </DockPanel>
         </Grid>
 
         <!-- ── Demo crashy ───────────────────────────────────────── -->
