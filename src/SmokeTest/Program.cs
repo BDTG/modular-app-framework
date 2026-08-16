@@ -242,8 +242,38 @@ if (sup.Modules.ContainsKey("proxy-client"))
 }
 else Console.WriteLine("SKIP  proxy-client (module không có ở modules root)");
 
+// ── 9d. tweaks (port MyOptimizationTool): list → status → apply HKCU → rollback ──
+if (sup.Modules.ContainsKey("tweaks"))
+{
+    await sup.StartAsync("tweaks");
+    await Task.Delay(800);
+    var list = await sup.CallAsync("tweaks.list");
+    int n = list.GetArrayLength();
+    Check($"tweaks.list có {n} tweaks (9 network + 3 system)", n == 12, $"count={n}");
+    foreach (var t in list.EnumerateArray().Take(3))
+        Console.WriteLine($"    • #{t.GetProperty("index").GetInt32()} {t.GetProperty("label").GetString()}");
+
+    // index 9 = system MenuShowDelay (HKCU — không cần admin)
+    var stBefore = await sup.CallAsync("tweaks.status", Json("index", 9));
+    Console.WriteLine($"    [tweaks] MenuShowDelay trước: {stBefore.GetProperty("args").GetString()}");
+    var ap = await sup.CallAsync("tweaks.apply", Json("index", 9));
+    Check("apply MenuShowDelay=0 OK (HKCU)", ap.GetProperty("ok").GetBoolean(), ap.TryGetProperty("error", out var ae) ? ae.GetString() : "");
+    var stAfter = await sup.CallAsync("tweaks.status", Json("index", 9));
+    Check("status → applied=true", stAfter.GetProperty("ok").GetBoolean() && stAfter.GetProperty("args").GetString()!.Contains("\"applied\":true"));
+
+    var rb = await sup.CallAsync("tweaks.rollback", Json("index", 9));
+    Check("rollback OK", rb.GetProperty("ok").GetBoolean());
+    var stRb = await sup.CallAsync("tweaks.status", Json("index", 9));
+    Check("rollback → applied=false (về giá trị cũ)", stRb.GetProperty("args").GetString()!.Contains("\"applied\":false"));
+
+    // index 0 = HKLM (LanmanWorkstation) — không elevated → lỗi sạch
+    var hklm = await sup.CallAsync("tweaks.apply", Json("index", 0));
+    Check("apply HKLM không admin → lỗi sạch (cần elevated)", !hklm.GetProperty("ok").GetBoolean() && hklm.GetProperty("error").GetString()!.Length > 0, hklm.GetProperty("error").GetString());
+}
+else Console.WriteLine("SKIP  tweaks (module không có ở modules root)");
+
 // ── 10. stop sạch tất cả ───────────────────────────────────────────
-foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "hello", "crashy" })
+foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "tweaks", "hello", "crashy" })
     if (sup.Modules.ContainsKey(id)) await sup.StopAsync(id);
 await Task.Delay(1000);
 Check("stop sạch tất cả module", sup.Modules.Values.All(m => m.State == ModuleRunState.Stopped));
