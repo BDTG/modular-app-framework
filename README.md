@@ -381,11 +381,12 @@ Giai đoạn 3 (đang làm):  Module `proxy-client` (✅ scaffold 16/08) + `twea
     BDTG/tweaks-module; SmokeTest 36/36 PASS (apply+rollback thật, HKLM fail-graceful)
   - ⏳ Còn lại: test proxy-client với VPS node thật; tích hợp chọn node theo `profiles`,
     nút "1 bấm 2 lớp" (AppHost đã có panel — chạy elevated là dùng được)
-  - ✅ Port 1000INONE (16/08, SmokeTest **40/40 PASS**, 10 module): `tweaks` (registry
-    + rollback), `startup-manager` (Run keys + folders disable), `appx-manager`
-    (17 pattern UWP + remove), `system-cleanup` (temp + recycle bin — dọn 1.47GB thật)
-  - Còn lại trong 1000INONE: game-boost, windows-activation (MAS), android-tools (ADB),
-    media-downloader, components-remover — cùng pattern
+  - ✅ Port 1000INONE (16/08, SmokeTest **46/46 PASS**, **14 module**): `tweaks` (registry
+    + rollback), `startup-manager`, `appx-manager`, `system-cleanup` (dọn 1.47GB thật),
+    `game-boost` (sc.exe services + explorer), `components-remover` (5 scripts JSON:
+    Edge/OneDrive/Defender/UpdateHealth/PCHealth), `android-tools` (ADB — tải platform-tools
+    bằng download_platform_tools.ps1), `windows-activation` (status WMI + edition, timeout 15s)
+  - Bỏ qua: media-downloader (không có service riêng — đề xuất yt-dlp wrapper riêng)
 ```
 
 ### Cấu trúc multi-repo (từ 16/08/2026)
