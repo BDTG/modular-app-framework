@@ -272,8 +272,45 @@ if (sup.Modules.ContainsKey("tweaks"))
 }
 else Console.WriteLine("SKIP  tweaks (module không có ở modules root)");
 
+// ── 9e. startup-manager / appx-manager / system-cleanup (port 1000INONE) ──
+if (sup.Modules.ContainsKey("startup-manager"))
+{
+    await sup.StartAsync("startup-manager");
+    await Task.Delay(800);
+    var sl = await sup.CallAsync("startup-manager.list");
+    int sn = sl.GetArrayLength();
+    Check($"startup-manager.list ≥ 1 item", sn > 0, $"count={sn}");
+    foreach (var it in sl.EnumerateArray().Take(3))
+        Console.WriteLine($"    • #{it.GetProperty("index").GetInt32()} {it.GetProperty("name").GetString()} [{it.GetProperty("location").GetString()}] enabled={it.GetProperty("isEnabled").GetBoolean()}");
+}
+else Console.WriteLine("SKIP  startup-manager (module không có ở modules root)");
+
+if (sup.Modules.ContainsKey("appx-manager"))
+{
+    await sup.StartAsync("appx-manager");
+    await Task.Delay(800);
+    var al = await sup.CallAsync("appx-manager.list");
+    Check("appx-manager.list trả 17 patterns", al.GetProperty("ok").GetBoolean() && al.GetProperty("args").GetString()!.Length > 0, al.TryGetProperty("error", out var ae2) ? ae2.GetString() : "");
+    var installed = al.GetProperty("args").GetString()!;
+    Console.WriteLine($"    [appx] {installed[..Math.Min(300, installed.Length)]}");
+}
+else Console.WriteLine("SKIP  appx-manager (module không có ở modules root)");
+
+if (sup.Modules.ContainsKey("system-cleanup"))
+{
+    await sup.StartAsync("system-cleanup");
+    await Task.Delay(800);
+    var sc = await sup.CallAsync("system-cleanup.scan");
+    Check("cleanup.scan OK", sc.GetProperty("ok").GetBoolean());
+    Console.WriteLine($"    [cleanup] {sc.GetProperty("args").GetString()}");
+    var cl = await sup.CallAsync("system-cleanup.clean");
+    Check("cleanup.clean chạy xong (giải phóng temp)", cl.GetProperty("ok").GetBoolean());
+    Console.WriteLine($"    [cleanup] {cl.GetProperty("args").GetString()}");
+}
+else Console.WriteLine("SKIP  system-cleanup (module không có ở modules root)");
+
 // ── 10. stop sạch tất cả ───────────────────────────────────────────
-foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "tweaks", "hello", "crashy" })
+foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "proxy-client", "tweaks", "startup-manager", "appx-manager", "system-cleanup", "hello", "crashy" })
     if (sup.Modules.ContainsKey(id)) await sup.StopAsync(id);
 await Task.Delay(1000);
 Check("stop sạch tất cả module", sup.Modules.Values.All(m => m.State == ModuleRunState.Stopped));
