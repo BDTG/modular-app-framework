@@ -364,7 +364,13 @@ Giai đoạn 2 (✅ XONG 16/08): Port Zapret-DPI-Bypass-Wrapper — 3 module
   - SmokeTest mở rộng: **23/23 PASS**; bundle zapret2 đã tải về
     `bundle\zapret-win-bundle` (winws2.exe + lua + blockcheck2.sh), module.json
     đã trỏ config; AppHost scan 5 module + start all đã verify qua computer_use
-  - ⏳ Còn lại: test blockcheck THẬT trên mạng VN (cần UAC winws2)
+  - ✅ TEST THẬT trên mạng VN (16/08, elevated): youtube.com sạch (working without
+    bypass); **tiktok.com bị chặn HTTP3/QUIC** — winws2 elevated chạy ~15 strategies
+    (fake quic_initial / ipfrag / drop) đều not working trên ISP này. Pipeline
+    blockcheck2.sh → SUMMARY → parse strategies hoạt động hoàn chỉnh qua module.
+  - Fix trong quá trình test: supervisor luôn gọi module `start` op (ctx/config
+    init — trước chỉ gọi khi AutoStart), blockcheck spawn cmd cần Redirect std
+    streams (cygwin bash fail im lặng khi không có pipe)
 
 Giai đoạn 3 (sau):      Port MyOptimizationTool, 1000-IN-ONE thành module
   - Mỗi tweak = 1 module con (hoặc 1 module "tweaks" với từng action nhỏ)
