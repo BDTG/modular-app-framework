@@ -34,18 +34,14 @@ public sealed partial class MainWindow : Window
         _loaded = true;
         try
         {
+            var settings = AppSettings.Load();
+            if (!string.IsNullOrEmpty(settings.ModulesRoot)) ModulesRootBox.Text = settings.ModulesRoot;
+            if (Content is FrameworkElement fe)
+                fe.RequestedTheme = settings.DarkTheme ? ElementTheme.Dark : ElementTheme.Light;
             var sup = EnsureSupervisor();
-            foreach (var id in sup.Modules.Keys.OrderBy(k => k))
-            {
-                NavView.MenuItems.Add(new NavigationViewItem
-                {
-                    Content = id,
-                    Tag = "module:" + id,
-                    Icon = new FontIcon { Glyph = "\u25CF", FontSize = 10 },
-                });
-            }
             NavView.SelectedItem = NavView.MenuItems[0];
             ContentFrame.Navigate(typeof(Pages.HomePage));
+            if (settings.AutoStartAll) _ = StartAllAsync();
         }
         catch (Exception ex)
         {
@@ -86,9 +82,9 @@ public sealed partial class MainWindow : Window
         {
             _sup?.Dispose();
             _sup = null;
-            // giữ 6 item cố định: [0] DPI 2 lớp, [1] sep, [2] header MODULES,
-            // [3] Module Manager, [4] sep, [5] Isolation demo — xóa module items từ cuối
-            while (NavView.MenuItems.Count > 6)
+            // giữ 7 item cố định (DPI 2 lớp, sep, header MODULES, Module Manager,
+            // sep, Isolation demo, Cài đặt) — xóa bất kỳ item thừa nào từ cuối
+            while (NavView.MenuItems.Count > 7)
                 NavView.MenuItems.RemoveAt(NavView.MenuItems.Count - 1);
             _loaded = false; // cho phép EnsureLoaded scan + thêm lại 14 module
             EnsureLoaded();
@@ -96,7 +92,9 @@ public sealed partial class MainWindow : Window
         catch (Exception ex) { StatsText.Text = ex.Message; }
     }
 
-    private async void StartAllBtn_Click(object sender, RoutedEventArgs e)
+    private async void StartAllBtn_Click(object sender, RoutedEventArgs e) => await StartAllAsync();
+
+    private async Task StartAllAsync()
     {
         try
         {
@@ -135,7 +133,9 @@ public sealed partial class MainWindow : Window
         if (tag == "home")
             ContentFrame.Navigate(typeof(Pages.HomePage), _sup);
         else if (tag == "manager")
-            ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, ModulesRootBox.Text.Trim() });
+            ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, ModulesRootBox.Text.Trim(), this });
+        else if (tag == "settings")
+            ContentFrame.Navigate(typeof(Pages.SettingsView), this);
         else if (tag == "demo")
             ContentFrame.Navigate(typeof(Pages.DemoPage), _sup);
         else if (tag.StartsWith("module:"))
@@ -158,4 +158,19 @@ public sealed partial class MainWindow : Window
     }
 
     public ModuleSupervisor? Supervisor => _sup;
+
+    public void SetModulesRoot(string root) => ModulesRootBox.Text = root;
+
+    /// <summary>Mở trang view chuyên biệt của module (từ Module Manager).</summary>
+    public void NavigateToModule(string id) => Navigate("module:" + id);
+
+    public void RescanModules()
+    {
+        try
+        {
+            _sup?.Rescan();
+            UpdateStats();
+        }
+        catch { }
+    }
 }

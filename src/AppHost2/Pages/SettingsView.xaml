@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="AppHost2.Pages.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid Padding="24" RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="Cài đặt framework" Style="{ThemeResource TitleTextBlockStyle}"/>
+            <TextBlock Text="Cấu hình AppHost — lưu tự động vào %LOCALAPPDATA%\mf-apphost\settings.json." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
+        </StackPanel>
+
+        <!-- Modules root -->
+        <Border Grid.Row="1" Padding="20,14" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefault}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <Grid ColumnSpacing="10" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="2">
+                    <TextBlock Text="MODULES ROOT" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" FontWeight="SemiBold"/>
+                    <TextBlock Text="Thư mục chứa các module (mỗi thư mục con = 1 module có module.json)." Opacity="0.6" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                </StackPanel>
+                <TextBox x:Name="RootBox" Grid.Row="1" Grid.Column="0"/>
+                <Button x:Name="ApplyRootBtn" Grid.Row="1" Grid.Column="1" Content="Lưu &amp; Quét lại" Click="ApplyRootBtn_Click" Style="{ThemeResource AccentButtonStyle}" Padding="14,8"/>
+            </Grid>
+        </Border>
+
+        <!-- Hành vi -->
+        <Border Grid.Row="2" Padding="20,14" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefault}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <StackPanel Spacing="12">
+                <TextBlock Text="HÀNH VI" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" FontWeight="SemiBold"/>
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Text="Tự start tất cả module khi mở AppHost" FontSize="14"/>
+                        <TextBlock Text="Bật: mở app là các module chạy ngay (nếu không bị disabled)." Opacity="0.55" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                    </StackPanel>
+                    <ToggleSwitch x:Name="AutoStartAllSwitch" Grid.Column="1" VerticalAlignment="Center" Toggled="AutoStartAll_Toggled"/>
+                </Grid>
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Text="Giao diện tối" FontSize="14"/>
+                        <TextBlock Text="Dark / Light theme — áp dụng ngay." Opacity="0.55" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                    </StackPanel>
+                    <ToggleSwitch x:Name="DarkThemeSwitch" Grid.Column="1" VerticalAlignment="Center" Toggled="DarkTheme_Toggled"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Logs + thông tin -->
+        <Border Grid.Row="3" Padding="20,14" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefault}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <Grid ColumnSpacing="14" RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="LOGS &amp; THÔNG TIN" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" FontWeight="SemiBold"/>
+                <TextBlock x:Name="LogsPath" Grid.Row="1" Grid.Column="0" Opacity="0.6" FontFamily="Consolas" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                <Button x:Name="OpenLogsBtn" Grid.Row="1" Grid.Column="1" Content="📁 Mở thư mục logs" Click="OpenLogsBtn_Click" Padding="12,6"/>
+                <TextBlock x:Name="InfoText" Grid.Row="2" Grid.Column="0" Opacity="0.55" Style="{ThemeResource CaptionTextBlockStyle}" FontFamily="Consolas"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

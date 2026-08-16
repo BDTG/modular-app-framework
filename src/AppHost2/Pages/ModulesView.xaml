@@ -26,7 +26,7 @@
         </StackPanel>
 
         <ScrollViewer Grid.Row="2">
-            <ListView x:Name="ModulesList" SelectionMode="None">
+            <ListView x:Name="ModulesList" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Card_Click">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Border Padding="16,12" CornerRadius="8" Margin="0,4"

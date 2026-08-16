@@ -29,6 +29,7 @@ public sealed partial class ModulesView : Page
     }
 
     private ModuleSupervisor? _sup;
+    private MainWindow? _mw;
     private string _modulesRoot = "";
     private readonly ObservableCollection<ModuleCard> _cards = new();
     private readonly DispatcherTimer _stateTimer;
@@ -46,10 +47,11 @@ public sealed partial class ModulesView : Page
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        if (e.Parameter is object[] { Length: 2 } p && p[0] is ModuleSupervisor sup && p[1] is string root)
+        if (e.Parameter is object[] { Length: 3 } p && p[0] is ModuleSupervisor sup && p[1] is string root)
         {
             _sup = sup;
             _modulesRoot = root;
+            _mw = p[2] as MainWindow;
             RefreshList();
         }
     }
@@ -176,6 +178,12 @@ public sealed partial class ModulesView : Page
             StatusText.Text = "⟳ Đã quét lại";
         }
         catch (Exception ex) { StatusText.Text = $"Lỗi: {ex.Message}"; }
+    }
+
+    private void Card_Click(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is ModuleCard card)
+            _mw?.NavigateToModule(card.Id);
     }
 
     private async void EnableToggle_Toggled(object sender, RoutedEventArgs e)
