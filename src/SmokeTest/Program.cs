@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using ModularFramework.HostLib;
 
@@ -137,12 +138,66 @@ else Console.WriteLine("SKIP  zapret-engine (module không có ở modules root)
 // ── 9. blockcheck: không có bundle → lỗi sạch (graceful) ──────────
 if (sup.Modules.ContainsKey("blockcheck"))
 {
-    await sup.StartAsync("blockcheck");
-    await Task.Delay(800);
-    var bc = await sup.CallAsync("blockcheck.run", Json("domain", "youtube.com", "ipv4", true, "ipv6", false));
-    Check("blockcheck thiếu bundle → lỗi sạch", !bc.GetProperty("ok").GetBoolean() && bc.GetProperty("error").GetString()!.Contains("bundle"), bc.TryGetProperty("error", out var be) ? be.GetString() : "");
+    var bcBundle = Path.Combine(modulesRoot, "blockcheck", "bundle", "zapret-win-bundle");
+    if (!Directory.Exists(bcBundle))
+    {
+        await sup.StartAsync("blockcheck");
+        await Task.Delay(800);
+        var bc = await sup.CallAsync("blockcheck.run", Json("domain", "youtube.com", "ipv4", true, "ipv6", false));
+        Check("blockcheck thiếu bundle → lỗi sạch", !bc.GetProperty("ok").GetBoolean() && bc.GetProperty("error").GetString()!.Contains("bundle"), bc.TryGetProperty("error", out var be) ? be.GetString() : "");
+    }
+    else Console.WriteLine("SKIP  test 'thiếu bundle' (bundle đã có — test thật ở 9b)");
 }
 else Console.WriteLine("SKIP  blockcheck (module không có ở modules root)");
+
+// ── 9b. blockcheck THẬT (chỉ khi có --bc-domain <domain>) ─────────
+string? bcDomain = GetArg("--bc-domain");
+if (bcDomain != null)
+{
+    if (!sup.Modules.ContainsKey("blockcheck"))
+    {
+        Console.WriteLine($"FAIL  blockcheck.run THẬT: module blockcheck không có ở modules root");
+        fail++;
+    }
+    else
+    {
+        if (sup.Modules["blockcheck"].State != ModuleRunState.Running)
+        {
+            await sup.StartAsync("blockcheck");
+            await Task.Delay(1000);
+        }
+        Console.WriteLine($"\n→ blockcheck.run THẬT domain={bcDomain} (chạy tối đa 30 phút)...");
+        var bcRun = await sup.CallAsync("blockcheck.run", Json("domain", bcDomain, "ipv4", true, "ipv6", false));
+        if (!bcRun.GetProperty("ok").GetBoolean())
+        {
+            Check("blockcheck.run start", false, bcRun.TryGetProperty("error", out var e) ? e.GetString() : "");
+        }
+        else
+        {
+            Check("blockcheck.run started", true);
+            var sw = Stopwatch.StartNew();
+            while (sw.Elapsed < TimeSpan.FromMinutes(31))
+            {
+                await Task.Delay(5000);
+                var p = await sup.CallAsync("blockcheck.poll");
+                bool running = p.TryGetProperty("running", out var rr) && rr.GetBoolean();
+                int n = p.TryGetProperty("strategies", out var ss) ? ss.GetArrayLength() : 0;
+                Console.WriteLine($"  [{sw.Elapsed:mm\\:ss}] running={running} strategies={n}  log={p.GetProperty("logFile").GetString()}");
+                if (!running) break;
+            }
+            var final = await sup.CallAsync("blockcheck.poll");
+            var strategies = final.GetProperty("strategies");
+            string? logFile = final.TryGetProperty("logFile", out var lf) ? lf.GetString() : null;
+            bool summaryWritten = logFile != null && File.Exists(logFile) &&
+                File.ReadAllText(logFile).Contains("* SUMMARY");
+            // 0 strategies là HỢP LỆ khi domain không bị chặn (mọi test working without bypass)
+            Check($"blockcheck hoàn tất — {strategies.GetArrayLength()} strategies (SUMMARY ghi log)", summaryWritten);
+            foreach (var s in strategies.EnumerateArray())
+                Console.WriteLine($"    • {s.GetProperty("label").GetString()}");
+            if (logFile != null) Console.WriteLine($"    log: {logFile}");
+        }
+    }
+}
 
 // ── 10. stop sạch tất cả ───────────────────────────────────────────
 foreach (var id in new[] { "profiles", "zapret-engine", "blockcheck", "hello", "crashy" })

@@ -101,8 +101,9 @@ public sealed class ModuleSupervisor : IDisposable
             throw new KeyNotFoundException(moduleId);
         inst.RestartCount = 0;
         await SpawnAndConnectAsync(inst, ct);
-        if (inst.Manifest.AutoStart)
-            await CallAsync(inst, "start", ct);
+        // BUG FIX: luôn gọi "start" (module.StartAsync init ctx/config) — AutoStart chỉ
+        // quyết định start tự động khi scan, không quyết định ngữ nghĩa StartAsync(moduleId).
+        await CallAsync(inst, "start", ct);
         StateChanged?.Invoke(inst);
     }
 
@@ -237,8 +238,9 @@ public sealed class ModuleSupervisor : IDisposable
             inst.Channel?.Dispose();
             inst.Channel = null;
             await SpawnAndConnectAsync(inst, CancellationToken.None);
-            if (inst.Manifest.AutoStart)
-                await CallAsync(inst, "start", CancellationToken.None);
+            // BUG FIX: module đã được start trước khi crash → restart phải start lại
+            // (không phụ thuộc AutoStart — nếu không module sẽ không init ctx/config).
+            await CallAsync(inst, "start", CancellationToken.None);
         }
         catch (Exception ex)
         {
