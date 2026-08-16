@@ -86,6 +86,9 @@ public sealed class ModuleSupervisor : IDisposable
                     ModuleRoot = dir,
                     LogFile = Path.Combine(_logsRoot, $"{manifest.Id}.log"),
                 };
+                // KernelSU-style: file disabled.flag = module bị tắt bằng UI
+                if (File.Exists(Path.Combine(dir, "disabled.flag")))
+                    inst.State = ModuleRunState.Disabled;
                 _modules[manifest.Id] = inst;
             }
             catch (Exception ex)
@@ -95,10 +98,33 @@ public sealed class ModuleSupervisor : IDisposable
         }
     }
 
+    /// <summary>Quét lại sau khi install/remove/enable/disable — giữ nguyên instance đang chạy.</summary>
+    public void Rescan()
+    {
+        var keep = _modules.Values
+            .Where(m => m.State is ModuleRunState.Running or ModuleRunState.Starting
+                or ModuleRunState.Restarting or ModuleRunState.Stopping)
+            .ToDictionary(m => m.Manifest.Id);
+        _modules.Clear();
+        ScanModules();
+        foreach (var kv in keep)
+        {
+            if (_modules.TryGetValue(kv.Key, out var fresh) && fresh.State == ModuleRunState.Stopped)
+            {
+                fresh.State = kv.Value.State;
+                fresh.Process = kv.Value.Process;
+                fresh.Channel = kv.Value.Channel;
+                fresh.RestartCount = kv.Value.RestartCount;
+            }
+        }
+    }
+
     public async Task StartAsync(string moduleId, CancellationToken ct = default)
     {
         if (!_modules.TryGetValue(moduleId, out var inst))
             throw new KeyNotFoundException(moduleId);
+        if (inst.State == ModuleRunState.Disabled)
+            throw new InvalidOperationException($"module '{moduleId}' đang bị tắt (disabled.flag)");
         inst.RestartCount = 0;
         await SpawnAndConnectAsync(inst, ct);
         // BUG FIX: luôn gọi "start" (module.StartAsync init ctx/config) — AutoStart chỉ

@@ -44,6 +44,11 @@
                 </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItemHeader Content="MODULES"/>
+                <NavigationViewItem Content="Module Manager" Tag="manager">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="AllApps"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItemSeparator/>
                 <NavigationViewItem Content="Isolation demo" Tag="demo">
                     <NavigationViewItem.Icon>

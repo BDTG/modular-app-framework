@@ -86,9 +86,9 @@ public sealed partial class MainWindow : Window
         {
             _sup?.Dispose();
             _sup = null;
-            // giữ 5 item cố định: [0] DPI 2 lớp, [1] separator, [2] header MODULES,
-            // [3] separator, [4] Isolation demo — xóa module items từ cuối
-            while (NavView.MenuItems.Count > 5)
+            // giữ 6 item cố định: [0] DPI 2 lớp, [1] sep, [2] header MODULES,
+            // [3] Module Manager, [4] sep, [5] Isolation demo — xóa module items từ cuối
+            while (NavView.MenuItems.Count > 6)
                 NavView.MenuItems.RemoveAt(NavView.MenuItems.Count - 1);
             _loaded = false; // cho phép EnsureLoaded scan + thêm lại 14 module
             EnsureLoaded();
@@ -134,6 +134,8 @@ public sealed partial class MainWindow : Window
     {
         if (tag == "home")
             ContentFrame.Navigate(typeof(Pages.HomePage), _sup);
+        else if (tag == "manager")
+            ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, ModulesRootBox.Text.Trim() });
         else if (tag == "demo")
             ContentFrame.Navigate(typeof(Pages.DemoPage), _sup);
         else if (tag.StartsWith("module:"))
