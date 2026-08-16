@@ -372,11 +372,16 @@ Giai đoạn 2 (✅ XONG 16/08): Port Zapret-DPI-Bypass-Wrapper — 3 module
     init — trước chỉ gọi khi AutoStart), blockcheck spawn cmd cần Redirect std
     streams (cygwin bash fail im lặng khi không có pipe)
 
-Giai đoạn 3 (sau):      Port MyOptimizationTool, 1000-IN-ONE thành module
+Giai đoạn 3 (đang làm):  Module `proxy-client` (✅ scaffold 16/08)
+  - Bọc **sing-box** 1.13: TUN mode toàn hệ thống + outbound **VLESS+REALITY** /
+    **Hysteria2**; ops: buildConfig (sinh config chuẩn sing-box 1.13 — DNS format mới,
+    utls fingerprint, reality keypair), check (`sing-box check`), start/stop/status
+    (redirect log, kill tree); cần admin cho TUN
+  - Repo: BDTG/proxy-client-module; SmokeTest 30/30 PASS (fail-graceful khi không admin)
+  - ⏳ Còn lại: test với VPS node thật (VLESS-REALITY/Hysteria2), tích hợp chọn node
+    theo `profiles`, nút "1 bấm 2 lớp" (zapret-engine + proxy-client)
+  - Sau: Port MyOptimizationTool, 1000-IN-ONE thành module
   - Mỗi tweak = 1 module con (hoặc 1 module "tweaks" với từng action nhỏ)
-  - Module `proxy-client`: bọc sing-box/Clash Meta — quản lý config VLESS-REALITY /
-    Hysteria2 theo profile, chọn node, TUN mode — kết hợp với `zapret-engine` thành
-    "1 nút bấm chống DPI 2 lớp" (packet-level + proxy transport)
 ```
 
 ### Cấu trúc multi-repo (từ 16/08/2026)
