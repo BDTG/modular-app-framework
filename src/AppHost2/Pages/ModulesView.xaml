@@ -20,6 +20,8 @@
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
             <Button x:Name="InstallBtn" Content="📦 Install từ file..." Click="InstallBtn_Click" Style="{ThemeResource AccentButtonStyle}" Padding="16,8"/>
+            <Button x:Name="StartAllBtn" Content="▶ Tất cả" Click="StartAllBtn_Click" Padding="16,8"/>
+            <Button x:Name="StopAllBtn" Content="■ Tất cả" Click="StopAllBtn_Click" Padding="16,8"/>
             <Button x:Name="RefreshBtn" Content="⟳ Quét lại" Click="RefreshBtn_Click" Padding="16,8"/>
             <ProgressRing x:Name="WorkRing" IsActive="False" Width="22" Height="22"/>
             <TextBlock x:Name="StatusText" Text="" VerticalAlignment="Center" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>

@@ -180,6 +180,36 @@ public sealed partial class ModulesView : Page
         catch (Exception ex) { StatusText.Text = $"Lỗi: {ex.Message}"; }
     }
 
+    private async void StartAllBtn_Click(object sender, RoutedEventArgs e)
+    {
+        WorkRing.IsActive = true;
+        try
+        {
+            if (_sup == null) return;
+            foreach (var id in _sup.Modules.Keys.ToList())
+                await _sup.StartAsync(id);
+            StatusText.Text = "▶ Đã start tất cả";
+        }
+        catch (Exception ex) { StatusText.Text = $"Lỗi: {ex.Message}"; }
+        WorkRing.IsActive = false;
+        RefreshList();
+    }
+
+    private async void StopAllBtn_Click(object sender, RoutedEventArgs e)
+    {
+        WorkRing.IsActive = true;
+        try
+        {
+            if (_sup == null) return;
+            foreach (var id in _sup.Modules.Keys.ToList())
+                await _sup.StopAsync(id);
+            StatusText.Text = "■ Đã stop tất cả";
+        }
+        catch (Exception ex) { StatusText.Text = $"Lỗi: {ex.Message}"; }
+        WorkRing.IsActive = false;
+        RefreshList();
+    }
+
     private void Card_Click(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is ModuleCard card)

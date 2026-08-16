@@ -7,61 +7,40 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Modular Framework — AppHost">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- Toolbar -->
-        <Grid Grid.Row="0" Padding="12,8" ColumnSpacing="8" Background="{ThemeResource SolidBackgroundFillColorSecondary}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Modules root:" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7"/>
-            <TextBox x:Name="ModulesRootBox" Grid.Column="1" Text="C:\Users\BDTG\Projects\mf-all" VerticalAlignment="Center" MinWidth="320"/>
-            <Button x:Name="ScanBtn" Grid.Column="2" Content="⟳ Quét lại" Click="ScanBtn_Click" VerticalAlignment="Center"/>
-            <Button x:Name="StartAllBtn" Grid.Column="3" Content="▶ Start tất cả" Click="StartAllBtn_Click" Style="{ThemeResource AccentButtonStyle}" VerticalAlignment="Center"/>
-            <Button x:Name="StopAllBtn" Grid.Column="4" Content="■ Stop tất cả" Click="StopAllBtn_Click" VerticalAlignment="Center"/>
-            <TextBlock x:Name="StatsText" Grid.Column="5" Text="" VerticalAlignment="Center" Style="{ThemeResource BodyStrongTextBlockStyle}" Margin="12,0,0,0"/>
-        </Grid>
-
-        <!-- Navigation + content -->
-        <NavigationView x:Name="NavView" Grid.Row="1"
-                        PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="False"
-                        PaneTitle="MODULAR FRAMEWORK" OpenPaneLength="248" CompactModeThresholdWidth="700"
-                        ItemInvoked="NavView_ItemInvoked" SelectionChanged="NavView_SelectionChanged">
-            <NavigationView.MenuItems>
-                <NavigationViewItem Content="DPI 2 lớp" Tag="home">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Link"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItemSeparator/>
-                <NavigationViewItemHeader Content="MODULES"/>
-                <NavigationViewItem Content="Module Manager" Tag="manager">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="AllApps"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItemSeparator/>
-                <NavigationViewItem Content="Isolation demo" Tag="demo">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Repair"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Cài đặt" Tag="settings">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Setting"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
-            <Frame x:Name="ContentFrame"/>
-        </NavigationView>
-    </Grid>
+    <NavigationView x:Name="NavView"
+                    PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="False"
+                    PaneTitle="MODULAR FRAMEWORK" OpenPaneLength="248" CompactModeThresholdWidth="700"
+                    ItemInvoked="NavView_ItemInvoked" SelectionChanged="NavView_SelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="DPI 2 lớp" Tag="home">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Link"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItemSeparator/>
+            <NavigationViewItemHeader Content="MODULES"/>
+            <NavigationViewItem Content="Module Manager" Tag="manager">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="AllApps"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItemSeparator/>
+            <NavigationViewItem Content="Isolation demo" Tag="demo">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Repair"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="Cài đặt" Tag="settings">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Setting"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <NavigationView.FooterMenuItems>
+            <NavigationViewItem>
+                <TextBlock x:Name="StatsText" Text="" FontSize="12" Opacity="0.7" Margin="0,2,0,6"/>
+            </NavigationViewItem>
+        </NavigationView.FooterMenuItems>
+        <Frame x:Name="ContentFrame"/>
+    </NavigationView>
 </Window>

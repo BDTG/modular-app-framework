@@ -11,6 +11,7 @@ namespace AppHost2;
 public sealed partial class MainWindow : Window
 {
     private ModuleSupervisor? _sup;
+    private string _modulesRoot = "C:\\Users\\BDTG\\Projects\\mf-all";
     private readonly DispatcherQueue _dq = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _statsTimer;
 
@@ -35,7 +36,7 @@ public sealed partial class MainWindow : Window
         try
         {
             var settings = AppSettings.Load();
-            if (!string.IsNullOrEmpty(settings.ModulesRoot)) ModulesRootBox.Text = settings.ModulesRoot;
+            if (!string.IsNullOrEmpty(settings.ModulesRoot)) _modulesRoot = settings.ModulesRoot;
             if (Content is FrameworkElement fe)
                 fe.RequestedTheme = settings.DarkTheme ? ElementTheme.Dark : ElementTheme.Light;
             var sup = EnsureSupervisor();
@@ -52,7 +53,7 @@ public sealed partial class MainWindow : Window
     private ModuleSupervisor EnsureSupervisor()
     {
         if (_sup != null) return _sup;
-        var modulesRoot = ModulesRootBox.Text.Trim();
+        var modulesRoot = _modulesRoot;
         var logsRoot = Path.Combine(Path.GetTempPath(), "mf-apphost2-logs");
         var moduleHostExe = Path.Combine(AppContext.BaseDirectory, "modulehost", "ModuleHost.exe");
         if (!File.Exists(moduleHostExe))
@@ -76,24 +77,6 @@ public sealed partial class MainWindow : Window
         StatsText.Text = $"● {all.Count} module · ● {running} chạy · ● {stopped} tắt · ● {disabled} disabled";
     }
 
-    private void ScanBtn_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            _sup?.Dispose();
-            _sup = null;
-            // giữ 7 item cố định (DPI 2 lớp, sep, header MODULES, Module Manager,
-            // sep, Isolation demo, Cài đặt) — xóa bất kỳ item thừa nào từ cuối
-            while (NavView.MenuItems.Count > 7)
-                NavView.MenuItems.RemoveAt(NavView.MenuItems.Count - 1);
-            _loaded = false; // cho phép EnsureLoaded scan + thêm lại 14 module
-            EnsureLoaded();
-        }
-        catch (Exception ex) { StatsText.Text = ex.Message; }
-    }
-
-    private async void StartAllBtn_Click(object sender, RoutedEventArgs e) => await StartAllAsync();
-
     private async Task StartAllAsync()
     {
         try
@@ -105,7 +88,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex) { StatsText.Text = ex.Message; }
     }
 
-    private async void StopAllBtn_Click(object sender, RoutedEventArgs e)
+    private async void StopAll_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -133,7 +116,7 @@ public sealed partial class MainWindow : Window
         if (tag == "home")
             ContentFrame.Navigate(typeof(Pages.HomePage), _sup);
         else if (tag == "manager")
-            ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, ModulesRootBox.Text.Trim(), this });
+            ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, _modulesRoot, this });
         else if (tag == "settings")
             ContentFrame.Navigate(typeof(Pages.SettingsView), this);
         else if (tag == "demo")
@@ -159,7 +142,7 @@ public sealed partial class MainWindow : Window
 
     public ModuleSupervisor? Supervisor => _sup;
 
-    public void SetModulesRoot(string root) => ModulesRootBox.Text = root;
+    public void SetModulesRoot(string root) => _modulesRoot = root;
 
     /// <summary>Mở trang view chuyên biệt của module (từ Module Manager).</summary>
     public void NavigateToModule(string id) => Navigate("module:" + id);
