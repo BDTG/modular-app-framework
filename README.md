@@ -119,15 +119,6 @@ repo; AppHost Settings → Modules root trỏ vào đó.
 feed (`C:\Users\BDTG\mf-local-feed`). Framework đổi → `src/scripts/publish_local_feed.ps1`
 (pack + push) → module bump version nếu cần.
 
-## Test
-
-SmokeTest (`src/SmokeTest`) chạy toàn bộ: scan → start từng module → gọi ops → stop.
-Module thiếu trong modules root → SKIP (không FAIL). Hiện **49/49 PASS**.
-
-Test thật đã làm: blockcheck trên mạng VN (youtube sạch, tiktok QUIC bị chặn —
-winws2 elevated ~15 strategies đều not working trên ISP), cleanup giải phóng 1.47 GB,
-tweaks apply/rollback registry thật.
-
 ## Roadmap
 
 - [ ] Test proxy-client với VPS node thật (VLESS-REALITY / Hysteria2)
