@@ -86,9 +86,11 @@ public sealed partial class MainWindow : Window
         {
             _sup?.Dispose();
             _sup = null;
-            // xóa items module cũ (giữ 3 item đầu: home, separator, header)
-            while (NavView.MenuItems.Count > 3)
-                NavView.MenuItems.RemoveAt(NavView.MenuItems.Count - 2);
+            // giữ 5 item cố định: [0] DPI 2 lớp, [1] separator, [2] header MODULES,
+            // [3] separator, [4] Isolation demo — xóa module items từ cuối
+            while (NavView.MenuItems.Count > 5)
+                NavView.MenuItems.RemoveAt(NavView.MenuItems.Count - 1);
+            _loaded = false; // cho phép EnsureLoaded scan + thêm lại 14 module
             EnsureLoaded();
         }
         catch (Exception ex) { StatsText.Text = ex.Message; }
