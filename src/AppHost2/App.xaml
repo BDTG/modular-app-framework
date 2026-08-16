@@ -8,6 +8,26 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Scrollbar dark — đồng bộ với UI tối (cả 2 theme để không bao giờ trắng) -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="ScrollBarBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ScrollBarTrackFill" Color="#1A1B1C"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFill" Color="#55575F"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#6A6D76"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#838793"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFillDisabled" Color="#33353A"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ScrollBarBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ScrollBarTrackFill" Color="#1A1B1C"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFill" Color="#55575F"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFillPointerOver" Color="#6A6D76"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFillPressed" Color="#838793"/>
+                    <SolidColorBrush x:Key="ScrollBarThumbFillDisabled" Color="#33353A"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
