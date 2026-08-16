@@ -353,6 +353,8 @@ if (sup.Modules.ContainsKey("windows-activation"))
     await Task.Delay(800);
     var wa = await sup.CallAsync("windows-activation.status");
     Console.WriteLine($"    [activation] status: {wa.GetProperty("args").GetString()}");
+    var wl = await sup.CallAsync("windows-activation.listMethods");
+    Check("listMethods = 4 phương thức MAS (hwid/ohook/kms/tsforge)", wl.GetArrayLength() == 4, $"count={wl.GetArrayLength()}");
     var we = await sup.CallAsync("windows-activation.edition");
     Check("edition đọc được (ProductName)", we.GetProperty("ok").GetBoolean() && we.GetProperty("args").GetString()!.Contains("productName"), we.TryGetProperty("error", out var wee) ? wee.GetString() : "");
     Console.WriteLine($"    [activation] edition: {we.GetProperty("args").GetString()}");
