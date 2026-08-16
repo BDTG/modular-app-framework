@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="AppHost2.Pages.ModulePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid Padding="24" RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header: title + state + pid + actions -->
+        <Grid Grid.Row="0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="ModTitle" Grid.Column="0" Text="" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+            <Border x:Name="ModStateBadge" Grid.Column="1" CornerRadius="999" Padding="12,4" VerticalAlignment="Center" Background="{ThemeResource AccentFillColorTertiaryBrush}">
+                <TextBlock x:Name="ModState" Text="" Style="{ThemeResource CaptionTextBlockStyle}" FontWeight="SemiBold"/>
+            </Border>
+            <TextBlock x:Name="ModPid" Grid.Column="2" Text="" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="3" x:Name="ModDesc" Text="" Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.6" VerticalAlignment="Center" TextWrapping="Wrap" Margin="8,0,0,0"/>
+            <Button x:Name="ModStartBtn" Grid.Column="4" Content="▶ Start" Click="ModStartBtn_Click" Style="{ThemeResource AccentButtonStyle}" VerticalAlignment="Center"/>
+            <Button x:Name="ModStopBtn" Grid.Column="5" Content="■ Stop" Click="ModStopBtn_Click" VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Tabs: Ops + Log -->
+        <TabView Grid.Row="1" x:Name="Tabs" IsAddTabButtonVisible="False" TabWidthMode="SizeToContent"
+                 CloseButtonOverlayMode="OnPointerOver" Background="Transparent">
+            <TabViewItem Header="Ops" IsClosable="False">
+                <Grid Padding="16,12" RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Chọn op để điền tên, nhập args JSON rồi bấm Chạy." Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <ListView x:Name="OpsList" Grid.Row="1" MaxHeight="130" SelectionChanged="OpsList_SelectionChanged">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Padding="0,4" Spacing="2">
+                                    <TextBlock Text="{Binding Key}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding Value}" Opacity="0.6" Style="{ThemeResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                        <TextBox x:Name="OpBox" PlaceholderText="op" Width="200"/>
+                        <Button x:Name="RunOpBtn" Content="▶ Chạy op" Click="RunOpBtn_Click" Style="{ThemeResource AccentButtonStyle}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="3" Text="args (JSON — bỏ trống nếu không cần)" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,6,0,0"/>
+                    <TextBox x:Name="ArgsBox" Grid.Row="4" AcceptsReturn="True" Height="52" PlaceholderText="{}" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                    <Grid Grid.Row="5" Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="kết quả" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                        <TextBox x:Name="ResultBox" Grid.Row="1" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
+                                 TextWrapping="NoWrap" Margin="0,4,0,0"
+                                 PlaceholderText="(chạy op để xem kết quả)"/>
+                    </Grid>
+                </Grid>
+            </TabViewItem>
+            <TabViewItem Header="Log" IsClosable="False">
+                <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
+                         TextWrapping="NoWrap" Padding="12" Margin="0,8,0,0"/>
+            </TabViewItem>
+        </TabView>
+    </Grid>
+</Page>

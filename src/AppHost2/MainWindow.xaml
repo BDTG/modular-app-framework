@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="AppHost2.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Modular Framework — AppHost">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Grid Grid.Row="0" Padding="12,8" ColumnSpacing="8" Background="{ThemeResource SolidBackgroundFillColorSecondary}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Modules root:" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.7"/>
+            <TextBox x:Name="ModulesRootBox" Grid.Column="1" Text="C:\Users\BDTG\Projects\mf-all" VerticalAlignment="Center" MinWidth="320"/>
+            <Button x:Name="ScanBtn" Grid.Column="2" Content="⟳ Quét lại" Click="ScanBtn_Click" VerticalAlignment="Center"/>
+            <Button x:Name="StartAllBtn" Grid.Column="3" Content="▶ Start tất cả" Click="StartAllBtn_Click" Style="{ThemeResource AccentButtonStyle}" VerticalAlignment="Center"/>
+            <Button x:Name="StopAllBtn" Grid.Column="4" Content="■ Stop tất cả" Click="StopAllBtn_Click" VerticalAlignment="Center"/>
+            <TextBlock x:Name="StatsText" Grid.Column="5" Text="" VerticalAlignment="Center" Style="{ThemeResource BodyStrongTextBlockStyle}" Margin="12,0,0,0"/>
+        </Grid>
+
+        <!-- Navigation + content -->
+        <NavigationView x:Name="NavView" Grid.Row="1"
+                        PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="False"
+                        PaneTitle="MODULAR FRAMEWORK" OpenPaneLength="248" CompactModeThresholdWidth="700"
+                        ItemInvoked="NavView_ItemInvoked" SelectionChanged="NavView_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="DPI 2 lớp" Tag="home">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Link"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItemHeader Content="MODULES"/>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItem Content="Isolation demo" Tag="demo">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Repair"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+            <Frame x:Name="ContentFrame"/>
+        </NavigationView>
+    </Grid>
+</Window>
