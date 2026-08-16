@@ -107,7 +107,7 @@ public sealed partial class ModulesView : Page
         }
     }
 
-    // ── Install từ file zip (KernelSU-style) ────────────────────────
+    // ── Install từ file zip ──────────────────────────────────────────
     private async void InstallBtn_Click(object sender, RoutedEventArgs e)
     {
         try
