@@ -36,8 +36,8 @@ public sealed partial class MainWindow : Window
             if (Content is FrameworkElement fe)
                 fe.RequestedTheme = settings.DarkTheme ? ElementTheme.Dark : ElementTheme.Light;
             var sup = EnsureSupervisor();
-            NavView.SelectedItem = NavView.MenuItems[0];
-            ContentFrame.Navigate(typeof(Pages.HomePage));
+            NavView.SelectedItem = NavView.MenuItems[1]; // Module Manager
+            ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, _modulesRoot, this });
             if (settings.AutoStartAll) _ = StartAllAsync();
         }
         catch (Exception ex)
@@ -99,9 +99,7 @@ public sealed partial class MainWindow : Window
 
     private void Navigate(string tag)
     {
-        if (tag == "home")
-            ContentFrame.Navigate(typeof(Pages.HomePage), _sup);
-        else if (tag == "manager")
+        if (tag == "manager")
             ContentFrame.Navigate(typeof(Pages.ModulesView), new object[] { _sup, _modulesRoot, this });
         else if (tag == "settings")
             ContentFrame.Navigate(typeof(Pages.SettingsView), this);

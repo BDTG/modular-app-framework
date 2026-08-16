@@ -23,12 +23,6 @@
                         PaneTitle="MODULAR FRAMEWORK" OpenPaneLength="248" CompactModeThresholdWidth="700"
                         ItemInvoked="NavView_ItemInvoked" SelectionChanged="NavView_SelectionChanged">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="DPI 2 lớp" Tag="home">
-                <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Link"/>
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItemSeparator/>
             <NavigationViewItemHeader Content="MODULES"/>
             <NavigationViewItem Content="Module Manager" Tag="manager">
                 <NavigationViewItem.Icon>
