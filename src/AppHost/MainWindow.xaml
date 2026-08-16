@@ -8,6 +8,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
@@ -58,5 +59,39 @@
             <Button x:Name="HangBtn" Content="💤 hang (30s)" Click="Hang_Click" Padding="10,4" Margin="4,0"/>
             <TextBlock x:Name="StatusText" Text="" Foreground="#F9E2AF" VerticalAlignment="Center" Margin="16,0,0,0"/>
         </StackPanel>
+
+        <!-- 🛡️ Chống DPI 2 lớp: zapret-engine (lớp 1) + proxy-client sing-box (lớp 2) -->
+        <Border Grid.Row="3" Background="#181825" BorderBrush="#89B4FA" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,8,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Text="🛡️ Node proxy:" Foreground="#89B4FA" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <ComboBox x:Name="NodeTypeBox" Width="120" Foreground="#CDD6F4" Background="#313244" SelectedIndex="0">
+                        <ComboBoxItem Content="VLESS-REALITY"/>
+                        <ComboBoxItem Content="Hysteria2"/>
+                    </ComboBox>
+                    <TextBlock Text="Server:" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                    <TextBox x:Name="NodeServerBox" Width="150" Foreground="#CDD6F4" Background="#313244"/>
+                    <TextBlock Text="Port:" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                    <TextBox x:Name="NodePortBox" Width="55" Foreground="#CDD6F4" Background="#313244" Text="443"/>
+                    <TextBlock Text="UUID/Pass:" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                    <TextBox x:Name="NodeSecretBox" Width="200" Foreground="#CDD6F4" Background="#313244"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0">
+                    <TextBlock Text="SNI:" Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                    <TextBox x:Name="NodeSniBox" Width="160" Foreground="#CDD6F4" Background="#313244" Margin="4,0,0,0"/>
+                    <TextBlock Text="PubKey(Reality):" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                    <TextBox x:Name="NodeKeyBox" Width="220" Foreground="#CDD6F4" Background="#313244"/>
+                    <TextBlock Text="ShortID:" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                    <TextBox x:Name="NodeShortIdBox" Width="80" Foreground="#CDD6F4" Background="#313244"/>
+                    <Button x:Name="SaveNodeBtn" Content="💾 Lưu node" Click="SaveNode_Click" Padding="10,4" Margin="8,0,0,0"/>
+                    <Button x:Name="TwoLayerOnBtn" Content="🚀 Bật 2 lớp" Click="TwoLayerOn_Click" Padding="10,4" Margin="8,0,0,0"/>
+                    <Button x:Name="TwoLayerOffBtn" Content="⏹ Tắt 2 lớp" Click="TwoLayerOff_Click" Padding="10,4" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
