@@ -11,7 +11,10 @@ public sealed partial class ModulePage : Page
 {
     private ModuleSupervisor? _sup;
     private readonly DispatcherTimer _logTimer;
+    private readonly DispatcherTimer _autoTimer;
     private string _lastLogTail = "";
+    private string _selectedOp = "";
+    private string _lastArgs = "";
     private readonly DispatcherQueue _dq = DispatcherQueue.GetForCurrentThread();
 
     public string ModuleId { get; private set; } = "";
@@ -21,6 +24,8 @@ public sealed partial class ModulePage : Page
         InitializeComponent();
         _logTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _logTimer.Tick += (_, _) => RefreshLog();
+        _autoTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _autoTimer.Tick += async (_, _) => await RunOpCoreAsync(refreshOnly: true);
     }
 
     // ── Ops map (14 module) ─────────────────────────────────────────
@@ -123,7 +128,10 @@ public sealed partial class ModulePage : Page
             ModuleId = id;
             ModTitle.Text = sup.Modules[id].Manifest.DisplayName;
             if (ModuleOps.TryGetValue(id, out var ops))
+            {
                 OpsList.ItemsSource = ops.ToList();
+                if (ops.Count > 0) OpsList.SelectedIndex = 0;
+            }
             RefreshState();
             _logTimer.Start();
         }
@@ -133,6 +141,7 @@ public sealed partial class ModulePage : Page
     {
         base.OnNavigatedFrom(e);
         _logTimer.Stop();
+        _autoTimer.Stop();
     }
 
     public void RefreshState()
@@ -174,34 +183,101 @@ public sealed partial class ModulePage : Page
     private void OpsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (OpsList.SelectedItem is KeyValuePair<string, string> kv)
-            OpBox.Text = kv.Key;
+        {
+            _selectedOp = kv.Key;
+            OpDescText.Text = kv.Value;
+            ResultList.ItemsSource = null;
+            ResultList.Visibility = Visibility.Collapsed;
+            ResultJsonPanel.Visibility = Visibility.Visible;
+            ResultBox.Text = "";
+            // op dạng live-list (devices...) → tự bật auto-refresh
+            AutoRefreshChk.IsChecked = kv.Key == "devices";
+        }
     }
 
-    private async void RunOpBtn_Click(object sender, RoutedEventArgs e)
+    private void RefreshOpBtn_Click(object sender, RoutedEventArgs e) => _ = RunOpCoreAsync(refreshOnly: true);
+
+    private void AutoRefreshChk_Changed(object sender, RoutedEventArgs e)
+    {
+        if (AutoRefreshChk.IsChecked == true) _autoTimer.Start();
+        else _autoTimer.Stop();
+    }
+
+    private async void RunOpBtn_Click(object sender, RoutedEventArgs e) => await RunOpCoreAsync(refreshOnly: false);
+
+    private async Task RunOpCoreAsync(bool refreshOnly)
     {
         try
         {
             if (_sup == null) return;
-            string op = OpBox.Text.Trim();
-            if (op.Length == 0) { ResultBox.Text = "Nhập tên op (hoặc chọn từ danh sách)."; return; }
+            string op = _selectedOp;
+            if (op.Length == 0 && !refreshOnly) { ResultBox.Text = "Chọn một op ở cột trái."; return; }
             if (_sup.Modules[ModuleId].State != ModuleRunState.Running)
                 await _sup.StartAsync(ModuleId);
             JsonElement args = JsonSerializer.SerializeToElement(new { });
-            string argsText = ArgsBox.Text.Trim();
-            if (argsText.Length > 0)
+            if (!refreshOnly)
             {
-                using var doc = JsonDocument.Parse(argsText);
+                _lastArgs = ArgsBox.Text.Trim();
+                if (_lastArgs.Length > 0)
+                {
+                    using var doc = JsonDocument.Parse(_lastArgs);
+                    args = doc.RootElement.Clone();
+                }
+            }
+            else if (_lastArgs.Length > 0)
+            {
+                using var doc = JsonDocument.Parse(_lastArgs);
                 args = doc.RootElement.Clone();
             }
             var result = await _sup.CallAsync($"{ModuleId}.{op}", args);
-            ResultBox.Text = JsonSerializer.Serialize(JsonDocument.Parse(result.GetRawText()).RootElement,
-                new JsonSerializerOptions { WriteIndented = true });
             RefreshState();
+            ShowResult(result);
         }
         catch (Exception ex)
         {
+            ResultJsonPanel.Visibility = Visibility.Visible;
+            ResultList.Visibility = Visibility.Collapsed;
             ResultBox.Text = $"Lỗi: {ex.GetType().Name} — {ex.Message}";
         }
+    }
+
+    /// <summary>Hiển thị kết quả: array → ListView (đẹp, cập nhật được), khác → JSON pretty.</summary>
+    private void ShowResult(JsonElement result)
+    {
+        if (result.ValueKind == JsonValueKind.Array)
+        {
+            var items = new List<string>();
+            foreach (var e in result.EnumerateArray())
+                items.Add(ItemDisplay(e));
+            ResultList.ItemsSource = items;
+            ResultList.Visibility = Visibility.Visible;
+            ResultJsonPanel.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            ResultJsonPanel.Visibility = Visibility.Visible;
+            ResultList.Visibility = Visibility.Collapsed;
+            ResultBox.Text = JsonSerializer.Serialize(JsonDocument.Parse(result.GetRawText()).RootElement,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
+    }
+
+    private static string ItemDisplay(JsonElement e)
+    {
+        if (e.ValueKind == JsonValueKind.Object)
+        {
+            var parts = new List<string>();
+            foreach (var key in new[] { "name", "displayName", "valueName", "packageFullName", "id", "device", "description", "status", "state", "path", "url" })
+            {
+                if (e.TryGetProperty(key, out var v) && v.ValueKind != JsonValueKind.Null && v.ValueKind != JsonValueKind.Undefined)
+                {
+                    var s = v.ValueKind == JsonValueKind.String ? v.GetString()! : v.ToString();
+                    if (!string.IsNullOrEmpty(s)) parts.Add(s);
+                }
+            }
+            return parts.Count > 0 ? string.Join("  ·  ", parts) : e.GetRawText();
+        }
+        return e.ValueKind == JsonValueKind.String ? e.GetString()! : e.ToString();
     }
 
     private void RefreshLog()

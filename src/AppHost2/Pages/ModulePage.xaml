@@ -36,41 +36,70 @@
         <TabView Grid.Row="1" x:Name="Tabs" IsAddTabButtonVisible="False" TabWidthMode="SizeToContent"
                  CloseButtonOverlayMode="OnPointerOver" Background="Transparent">
             <TabViewItem Header="Ops" IsClosable="False">
-                <Grid Padding="16,12" RowSpacing="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Chọn op để điền tên, nhập args JSON rồi bấm Chạy." Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
-                    <ListView x:Name="OpsList" Grid.Row="1" MaxHeight="130" SelectionChanged="OpsList_SelectionChanged">
+                <Grid Padding="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="210"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Cột trái: danh sách op -->
+                    <ListView x:Name="OpsList" Grid.Column="0" SelectionChanged="OpsList_SelectionChanged"
+                              BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1"
+                              CornerRadius="6" Padding="4">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Padding="0,4" Spacing="2">
+                                <StackPanel Padding="2,6" Spacing="2">
                                     <TextBlock Text="{Binding Key}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Value}" Opacity="0.6" Style="{ThemeResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Value}" Opacity="0.55" Style="{ThemeResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                        <TextBox x:Name="OpBox" PlaceholderText="op" Width="200"/>
-                        <Button x:Name="RunOpBtn" Content="▶ Chạy op" Click="RunOpBtn_Click" Style="{ThemeResource AccentButtonStyle}"/>
-                    </StackPanel>
-                    <TextBlock Grid.Row="3" Text="args (JSON — bỏ trống nếu không cần)" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,6,0,0"/>
-                    <TextBox x:Name="ArgsBox" Grid.Row="4" AcceptsReturn="True" Height="52" PlaceholderText="{}" FontFamily="Consolas" TextWrapping="NoWrap"/>
-                    <Grid Grid.Row="5" Margin="0,8,0,0">
+
+                    <!-- Cột phải: chi tiết op -->
+                    <Grid Grid.Column="1" Margin="14,0,0,0" RowSpacing="8">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="kết quả" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
-                        <TextBox x:Name="ResultBox" Grid.Row="1" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
-                                 TextWrapping="NoWrap" Margin="0,4,0,0"
-                                 PlaceholderText="(chạy op để xem kết quả)"/>
+
+                        <!-- Thanh thao tác -->
+                        <Grid Grid.Row="0" ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="RunOpBtn" Grid.Column="0" Content="▶ Chạy op" Click="RunOpBtn_Click" Style="{ThemeResource AccentButtonStyle}"/>
+                            <Button x:Name="RefreshOpBtn" Grid.Column="1" Content="⟳ Làm mới" Click="RefreshOpBtn_Click"/>
+                            <CheckBox x:Name="AutoRefreshChk" Grid.Column="2" Content="⏱ tự làm mới (3s)" Checked="AutoRefreshChk_Changed" Unchecked="AutoRefreshChk_Changed" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="OpDescText" Grid.Column="3" Text="" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" VerticalAlignment="Center" TextWrapping="Wrap" Margin="8,0,0,0"/>
+                            <TextBox x:Name="ArgsBox" Grid.Column="4" Width="170" PlaceholderText="args JSON (nếu cần)" FontFamily="Consolas" FontSize="12"/>
+                        </Grid>
+
+                        <!-- Kết quả dạng danh sách (op trả array) -->
+                        <ListView x:Name="ResultList" Grid.Row="2" Visibility="Collapsed" SelectionMode="None"
+                                  BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="6">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" FontFamily="Consolas" FontSize="12.5" Padding="4,5" TextWrapping="Wrap"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <!-- Kết quả dạng JSON (mặc định) -->
+                        <Grid Grid.Row="2" x:Name="ResultJsonPanel">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="kết quả" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,4,0,0"/>
+                            <TextBox x:Name="ResultBox" Grid.Row="1" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
+                                     TextWrapping="NoWrap" Margin="0,6,0,0" PlaceholderText="(chạy op để xem kết quả)"/>
+                        </Grid>
                     </Grid>
                 </Grid>
             </TabViewItem>
