@@ -11,7 +11,8 @@ namespace AppHost2;
 public sealed partial class MainWindow : Window
 {
     private ModuleSupervisor? _sup;
-    private string _modulesRoot = "C:\\Users\\BDTG\\Projects\\mf-all";
+    private string _modulesRoot = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Projects", "mf-all");
     private readonly DispatcherQueue _dq = DispatcherQueue.GetForCurrentThread();
 
     public MainWindow()

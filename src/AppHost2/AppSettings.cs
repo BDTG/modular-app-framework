@@ -8,7 +8,8 @@ public class AppSettings
 {
     public bool AutoStartAll { get; set; }
     public bool DarkTheme { get; set; } = true;
-    public string ModulesRoot { get; set; } = "C:\\Users\\BDTG\\Projects\\mf-all";
+    public string ModulesRoot { get; set; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Projects", "mf-all");
 
     private static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "mf-apphost", "settings.json");

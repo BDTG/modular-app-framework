@@ -112,9 +112,9 @@ Module tham chiếu `PackageReference FrameworkSDK` (NuGet local feed — xem d�
 | [android-tools-module](https://github.com/BDTG/android-tools-module) | android-tools | ADB — devices/shell/killServer |
 | [windows-activation-module](https://github.com/BDTG/windows-activation-module) | windows-activation | Activation status, traces (dò KMS), cleanKms, MAS activate |
 
-**Chạy cả hệ thống:** `C:\Users\BDTG\Projects\mf-all` chứa junction tới từng module
-repo; AppHost Settings → Modules root trỏ vào đó.
+**Chạy cả hệ thống:** `~/Projects/mf-all` chứa junction tới từng module
+repo; AppHost Settings → Modules root trỏ vào đó (mặc định `%USERPROFILE%\Projects\mf-all`).
 
 **Dependency:** module repos dùng `PackageReference FrameworkSDK` qua NuGet local
-feed (`C:\Users\BDTG\mf-local-feed`). Framework đổi → `src/scripts/publish_local_feed.ps1`
+feed (`%USERPROFILE%\mf-local-feed`). Framework đổi → `src/scripts/publish_local_feed.ps1`
 (pack + push) → module bump version nếu cần.
