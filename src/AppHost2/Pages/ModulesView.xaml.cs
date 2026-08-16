@@ -223,8 +223,7 @@ public sealed partial class ModulesView : Page
         try
         {
             if (_sup == null || !_sup.Modules.TryGetValue(id, out var inst)) return;
-            var flag = Path.Combine(inst.ModuleRoot, "disabled.flag");
-            if (ts.IsOn && File.Exists(flag)) File.Delete(flag);
+            var flag = Path.Combine(inst.ModuleRoot, "disabled.flag");            if (ts.IsOn && File.Exists(flag)) File.Delete(flag);
             if (!ts.IsOn && !File.Exists(flag))
             {
                 if (inst.State == ModuleRunState.Running) await _sup.StopAsync(id);

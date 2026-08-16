@@ -15,7 +15,7 @@
 
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Text="Module Manager" Style="{ThemeResource TitleTextBlockStyle}"/>
-            <TextBlock Text="Cài module từ file zip, bật/tắt, gỡ — như KernelSU Manager." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
+            <TextBlock Text="Cài module từ file zip, bật/tắt, gỡ — quản lý mọi module trong một chỗ." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">

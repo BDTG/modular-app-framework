@@ -23,7 +23,7 @@ AppHost (WinUI 3 shell)
 
 - Module **không gọi thẳng module khác** — mọi thứ qua host (hub).
 - Trao đổi chỉ là **JSON thuần** — không share object, không version-mismatch.
-- Module bị tắt bằng file `disabled.flag` trong thư mục module (KernelSU-style).
+- Module bị tắt bằng file `disabled.flag` trong thư mục module (xóa file để bật lại).
 
 ## Repo structure
 
@@ -47,9 +47,15 @@ dotnet build src/SmokeTest/SmokeTest.csproj        # test toàn hệ thống
 dotnet src/SmokeTest/bin/Debug/net10.0/SmokeTest.dll --modules C:/path/to/modules
 ```
 
-AppHost mở thẳng **Module Manager**: cài module từ file zip (📦 Install), bật/tắt
-(toggle → `disabled.flag`), start/stop từng module, gỡ. Click card → view chuyên
-biệt của module (ops + log realtime).
+AppHost mở thẳng **Module Manager** — quản lý mọi module ở một chỗ:
+
+| Thao tác | Cách |
+|---|---|
+| Cài module | 📦 Install từ file → chọn zip (module.json + dll + bundle) → validate → copy vào modules root → xuất hiện ngay |
+| Bật/tắt | ToggleSwitch → tạo/xóa `disabled.flag` (module Disabled, start bị chặn) |
+| Start/Stop | Nút trên card từng module, hoặc ▶/■ Tất cả |
+| Gỡ | Dialog xác nhận → stop → xóa thư mục |
+| Mở chức năng | Click card → view chuyên biệt (toggle tweaks, bảng cleanup, card activation...) |
 
 ## Viết module
 

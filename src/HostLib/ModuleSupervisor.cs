@@ -86,7 +86,7 @@ public sealed class ModuleSupervisor : IDisposable
                     ModuleRoot = dir,
                     LogFile = Path.Combine(_logsRoot, $"{manifest.Id}.log"),
                 };
-                // KernelSU-style: file disabled.flag = module bị tắt bằng UI
+                // disabled.flag = module bị tắt bằng UI (xóa file để bật lại)
                 if (File.Exists(Path.Combine(dir, "disabled.flag")))
                     inst.State = ModuleRunState.Disabled;
                 _modules[manifest.Id] = inst;
