@@ -355,6 +355,13 @@ if (sup.Modules.ContainsKey("windows-activation"))
     Console.WriteLine($"    [activation] status: {wa.GetProperty("args").GetString()}");
     var wl = await sup.CallAsync("windows-activation.listMethods");
     Check("listMethods = 4 phương thức MAS (hwid/ohook/kms/tsforge)", wl.GetArrayLength() == 4, $"count={wl.GetArrayLength()}");
+    var wt = await sup.CallAsync("windows-activation.traces");
+    Check("traces dò được activation method", wt.GetProperty("ok").GetBoolean() && wt.GetProperty("args").GetString()!.Contains("activationMethod"), wt.TryGetProperty("error", out var wte) ? wte.GetString() : "");
+    Console.WriteLine($"    [activation] traces: {wt.GetProperty("args").GetString()}");
+    var wc = await sup.CallAsync("windows-activation.cleanKms", Json("dryRun", true));
+    Check("cleanKms dryRun liệt kê 8 bước (không thực thi)", wc.GetProperty("ok").GetBoolean() && wc.GetProperty("args").GetString()!.Contains("dryRun"), "");
+    string? wcArgs = wc.GetProperty("args").GetString();
+    Console.WriteLine($"    [activation] cleanKms(dryRun): {wcArgs?[..Math.Min(250, wcArgs.Length)] ?? ""}");
     var we = await sup.CallAsync("windows-activation.edition");
     Check("edition đọc được (ProductName)", we.GetProperty("ok").GetBoolean() && we.GetProperty("args").GetString()!.Contains("productName"), we.TryGetProperty("error", out var wee) ? wee.GetString() : "");
     Console.WriteLine($"    [activation] edition: {we.GetProperty("args").GetString()}");
